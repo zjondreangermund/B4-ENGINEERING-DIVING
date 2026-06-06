@@ -662,22 +662,22 @@ if (jrSheet) {
     blankrows: false,
   });
 
-  // Your Job Register headers are on Excel row 2, so real data starts on row 3.
+  // Job Register headers are on Excel row 2, so real data starts on row 3.
   const dataRows = matrix.slice(2);
 
   for (const row of dataRows) {
-    const jobNumber = row[0];              // A: Job_Nr
-    const jobDate = toDate(row[1]);        // B: Date
-    const opsManager = row[2];             // C: Divison H
-    const division = row[3];               // D: Divisio
-    const clientName = row[4];             // E: Client
-    const description = row[5];            // F: Job/Project_Description
-    const completionDate = toDate(row[6]); // G: Completion_
-    const quoteNumber = row[7];            // H: Quote_Nr
-    const poNumber = row[8];               // I: PO_No
-    const issued = row[9];                 // J: issued
-    const invoiceNumber = row[10];         // K: Invoice No.
-    const form = row[11];                  // L: Form
+    const jobNumber = row[0];               // A: Job_Nr
+    const jobDate = toDate(row[1]);         // B: Date
+    const opsManager = row[2];              // C: Divison H
+    const division = row[3];                // D: Divisio
+    const clientName = row[4];              // E: Client
+    const description = row[5];             // F: Job/Project_Description
+    const completionDate = toDate(row[6]);  // G: Completion_
+    const quoteNumber = row[7];             // H: Quote_Nr
+    const poNumber = row[8];                // I: PO_No
+    const issued = row[9];                  // J: issued
+    const invoiceNumber = row[10];          // K: Invoice No.
+    const form = row[11];                   // L: Form
     const valueInclVat = toNumber(row[12]); // M: Value_incl_Vat
     const valueExclVat = toNumber(row[13]); // N: Value_excl_Va
 
@@ -724,86 +724,6 @@ if (jrSheet) {
     registerRows += 1;
   }
 }
-      `
-      INSERT INTO job_register_entries (
-        job_number,
-        job_date,
-        ops_manager,
-        division,
-        client_name,
-        description,
-        completion_date,
-        quote_number,
-        po_number,
-        report_reference,
-        invoice_number,
-        client_feedback,
-        value_incl_vat,
-        value_excl_vat
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-      `,
-      [
-        jobNumber ? String(jobNumber) : null,
-        jobDate,
-        pick(row, FIELD_ALIASES.opsManager) || null,
-        pick(row, FIELD_ALIASES.division) || null,
-        pick(row, FIELD_ALIASES.client) || null,
-        description || null,
-        toDate(row['Completion_'] || row['Completion_Date'] || row['Completion Date']),
-        pick(row, FIELD_ALIASES.quoteNumber) || null,
-        pick(row, FIELD_ALIASES.poNumber) || null,
-        row.issued || row['Report No. and date issued'] || row.Report || null,
-        pick(row, FIELD_ALIASES.invoiceNumber) || null,
-        row.Form || row['Client Feed Back Form'] || row['Client Feedback'] || null,
-        toNumber(row.Value_incl_Vat || row['Value Incl VAT']),
-        toNumber(row.Value_excl_Va || row.Value_excl_Vat || row['Value Excl VAT']),
-      ]
-    );
-
-    registerRows += 1;
-  }
-}
-          `
-          INSERT INTO job_register_entries (
-            job_number,
-            job_date,
-            ops_manager,
-            division,
-            client_name,
-            description,
-            completion_date,
-            quote_number,
-            po_number,
-            report_reference,
-            invoice_number,
-            client_feedback,
-            value_incl_vat,
-            value_excl_vat
-          )
-          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-          `,
-          [
-            jobNumber ? String(jobNumber) : null,
-            jobDate,
-            pick(row, FIELD_ALIASES.opsManager) || null,
-            pick(row, FIELD_ALIASES.division) || null,
-            pick(row, FIELD_ALIASES.client) || null,
-            description || null,
-            toDate(row['Completion_'] || row['Completion_Date'] || row['Completion Date']),
-            pick(row, FIELD_ALIASES.quoteNumber) || null,
-            pick(row, FIELD_ALIASES.poNumber) || null,
-            row.issued || row['Report No. and date issued'] || row.Report || null,
-            pick(row, FIELD_ALIASES.invoiceNumber) || null,
-            row.Form || row['Client Feed Back Form'] || row['Client Feedback'] || null,
-            toNumber(row.Value_incl_Vat || row['Value Incl VAT']),
-            toNumber(row.Value_excl_Va || row.Value_excl_Vat || row['Value Excl VAT']),
-          ]
-        );
-
-        registerRows += 1;
-      }
-    }
 
     const jcSheet = findSheet(workbook, ['Job Card Conversion', 'JobCardConversion']);
 
