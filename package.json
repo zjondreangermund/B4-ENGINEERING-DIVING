@@ -1,16 +1,19 @@
 {
   "name": "b4-nautilus-operations",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "B4 Nautilus Operations Suite prototype - Railway deployable web app",
+  "description": "B4 Nautilus Operations Suite - Railway deployable web app",
   "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
   },
   "dependencies": {
+    "@fastify/multipart": "latest",
     "@fastify/static": "latest",
-    "fastify": "latest"
+    "fastify": "latest",
+    "pg": "latest",
+    "xlsx": "latest"
   },
   "engines": {
     "node": ">=20"
