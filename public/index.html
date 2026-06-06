@@ -1,269 +1,32 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nautilus Enterprise</title>
-  <style>
-    :root{--navy:#061826;--blue:#0c3b5a;--cyan:#19b4d8;--green:#16a34a;--orange:#f59e0b;--red:#ef4444;--bg:#f3f7fb;--card:#ffffff;--text:#102030;--muted:#64748b;}
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    .sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:linear-gradient(180deg,var(--navy),#0b2940);color:#fff;padding:24px 18px;}
-    .logo{font-size:24px;font-weight:800;letter-spacing:.5px;margin-bottom:4px}.sub{font-size:12px;opacity:.75;margin-bottom:28px}
-    .nav a{display:block;color:#d8eff7;text-decoration:none;padding:12px 14px;border-radius:12px;margin:5px 0;cursor:pointer}.nav a.active,.nav a:hover{background:rgba(255,255,255,.12);color:#fff}
-    .main{margin-left:260px;padding:28px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:12px}.h1{font-size:30px;font-weight:800}.pill{background:#dff7ff;color:#07506a;padding:9px 14px;border-radius:999px;font-weight:700}
-    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}.card{background:var(--card);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.07);border:1px solid #e6eef5}.label{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.06em}.value{font-size:26px;font-weight:850;margin-top:8px}.good{color:var(--green)}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}h2{margin:0 0 12px;font-size:18px}.bar{display:flex;align-items:center;gap:12px;margin:11px 0}.bar span{width:110px;font-size:13px;color:#334155}.track{flex:1;background:#e7eef5;border-radius:999px;height:12px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--cyan),#0f766e);border-radius:999px}.bar strong{width:130px;text-align:right;font-size:13px}
-    table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;color:var(--muted);border-bottom:1px solid #e2e8f0;padding:12px;background:#f8fafc}td{padding:12px;border-bottom:1px solid #edf2f7}tr:hover{background:#f8fbff}.btn{background:var(--cyan);color:#fff;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}.btn.secondary{background:#0f766e}.btn.orange{background:var(--orange)}.muted{color:var(--muted)}.profit{font-weight:800;color:#047857}.danger{color:var(--red);font-weight:700}.hidden{display:none!important}.status{padding:10px 12px;border-radius:12px;background:#eef7ff;color:#07506a;font-weight:700;font-size:13px}.status.error{background:#fee2e2;color:#991b1b}.status.ok{background:#dcfce7;color:#166534}
-    .upload{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.upload input{background:#fff;border:1px solid #d7e2ec;border-radius:12px;padding:10px}.small{font-size:12px;color:var(--muted);margin-top:5px}.filters{display:flex;gap:10px;flex-wrap:wrap}.filters input,.filters select{border:1px solid #d7e2ec;border-radius:12px;padding:10px;min-width:150px;background:white}
-    @media(max-width:1000px){.sidebar{position:relative;width:auto}.main{margin-left:0}.grid{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
-  </style>
-</head>
-<body>
-  <aside class="sidebar">
-    <div class="logo">Nautilus</div>
-    <div class="sub">B4 Engineering & Diving operations</div>
-    <nav class="nav">
-      <a class="active" data-view="dashboard">Executive Dashboard</a>
-      <a data-view="jobs">Job Register</a>
-      <a data-view="imports">Import Excel</a>
-      <a data-view="reports">Reports</a>
-      <a data-view="settings">Settings</a>
-    </nav>
-  </aside>
-
-  <main class="main">
-    <div class="top">
-      <div>
-        <div class="h1">Executive Dashboard</div>
-        <div class="muted">Live profitability view from PostgreSQL and imported Excel job data</div>
-      </div>
-      <div id="apiStatus" class="status">Checking database...</div>
-    </div>
-
-    <section id="dashboardView">
-      <section class="grid" id="kpis"></section>
-      <section class="row">
-        <div class="card"><h2>Profit by Division</h2><div id="divisions"></div></div>
-        <div class="card"><h2>OPS Manager Performance</h2><div id="ops"></div></div>
-      </section>
-      <section class="card">
-        <div class="top" style="margin-bottom:0">
-          <h2>Job Register</h2>
-          <div><button class="btn" onclick="showView('imports')">Import Excel</button> <button class="btn secondary" onclick="downloadJobsCsv()">Export CSV</button></div>
-        </div>
-        <table><thead><tr><th>Job</th><th>Date</th><th>Invoice</th><th>Division</th><th>OPS</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th></tr></thead><tbody id="jobs"></tbody></table>
-      </section>
-    </section>
-
-    <section id="jobsView" class="hidden">
-      <section class="card">
-        <div class="top">
-          <h2>Job Register</h2>
-          <button class="btn" onclick="loadAll()">Refresh</button>
-        </div>
-        <div class="filters" style="margin-bottom:16px">
-          <input id="searchInput" placeholder="Search job, invoice, division, OPS" oninput="renderJobsTable()">
-          <select id="divisionFilter" onchange="renderJobsTable()"><option value="">All divisions</option></select>
-          <select id="opsFilter" onchange="renderJobsTable()"><option value="">All OPS managers</option></select>
-        </div>
-        <table><thead><tr><th>Job</th><th>Date</th><th>Invoice</th><th>Division</th><th>OPS</th><th>Hours</th><th>Revenue</th><th>Total Cost</th><th>Profit</th></tr></thead><tbody id="jobsFull"></tbody></table>
-      </section>
-    </section>
-
-    <section id="importsView" class="hidden">
-      <section class="card">
-        <div class="top">
-          <div>
-            <h2>Import Excel Workbook</h2>
-            <div class="muted">Upload the B4 Excel file. The system will replace current job data and rebuild dashboard values.</div>
-          </div>
-        </div>
-        <div class="upload">
-          <input id="excelFile" type="file" accept=".xlsx,.xls,.csv">
-          <button class="btn" onclick="uploadExcel()">Upload & Import</button>
-          <button class="btn orange" onclick="seedTestData()">Seed Test Data</button>
-        </div>
-        <div class="small">Supported columns include Job Nr, Invoice No, Date, Division, OPS Manager, Total Hours, Revenue Excl VAT, Labour Costs, Equipment Costs, Workshop Cost and Total Costs.</div>
-        <div id="importMessage" class="status hidden" style="margin-top:16px"></div>
-      </section>
-      <section class="card" style="margin-top:18px">
-        <h2>Import History</h2>
-        <table><thead><tr><th>Filename</th><th>Rows</th><th>Status</th><th>Imported At</th></tr></thead><tbody id="importsTable"></tbody></table>
-      </section>
-    </section>
-
-    <section id="reportsView" class="hidden"><section class="card"><h2>Reports</h2><p class="muted">Next build: monthly revenue trend, division report, OPS manager report and PDF exports.</p></section></section>
-    <section id="settingsView" class="hidden"><section class="card"><h2>Settings</h2><p class="muted">Next build: company profile, users, roles, divisions, VAT and subscription plan.</p></section></section>
-  </main>
-
-  <script>
-    let dashboardData = null;
-    let jobsData = [];
-    let importsData = [];
-
-    const money = (n) => 'N$ ' + Math.round(Number(n || 0)).toLocaleString();
-    const num = (n) => Number(n || 0).toLocaleString();
-    const pct = (n) => `${(Number(n || 0) * 100).toFixed(1)}%`;
-
-    function showView(view) {
-      for (const id of ['dashboardView','jobsView','importsView','reportsView','settingsView']) document.getElementById(id).classList.add('hidden');
-      document.getElementById(view + 'View').classList.remove('hidden');
-      document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('active', a.dataset.view === view));
-      if (view === 'jobs') renderJobsTable();
-      if (view === 'imports') renderImports();
-    }
-
-    document.querySelectorAll('.nav a').forEach(a => a.addEventListener('click', () => showView(a.dataset.view)));
-
-    async function api(path, options) {
-      const res = await fetch(path, options);
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || `Request failed: ${res.status}`);
-      }
-      return res.json();
-    }
-
-    async function checkStatus() {
-      const el = document.getElementById('apiStatus');
-      try {
-        const status = await api('/api/status');
-        el.textContent = status.database === 'connected' ? 'Database connected' : 'Database not connected';
-        el.className = status.database === 'connected' ? 'status ok' : 'status error';
-      } catch (error) {
-        el.textContent = 'API offline';
-        el.className = 'status error';
-      }
-    }
-
-    async function loadAll() {
-      await checkStatus();
-      dashboardData = await api('/api/dashboard');
-      jobsData = await api('/api/jobs?limit=500');
-      importsData = await api('/api/imports');
-      renderDashboard();
-      renderFilters();
-      renderJobsTable();
-      renderImports();
-    }
-
-    function renderDashboard() {
-      const t = dashboardData?.totals || {};
-      const gp = Number(t.revenue || 0) > 0 ? Number(t.gross_profit || 0) / Number(t.revenue || 1) : 0;
-      const cards = [
-        ['Revenue Excl VAT', money(t.revenue)],
-        ['Gross Profit', money(t.gross_profit), 'good'],
-        ['GP %', pct(gp)],
-        ['Jobs', num(t.jobs)],
-        ['Labour Cost', money(t.labour_cost)],
-        ['Equipment Cost', money(t.equipment_cost)],
-        ['Workshop Cost', money(t.workshop_cost)],
-        ['Total Cost', money(t.total_cost)]
-      ];
-      document.getElementById('kpis').innerHTML = cards.map(c => `<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2] || ''}">${c[1]}</div></div>`).join('');
-      renderBars('divisions', dashboardData?.divisions || [], 'division');
-      renderBars('ops', dashboardData?.opsManagers || [], 'ops_manager');
-      renderMiniJobs();
-    }
-
-    function renderBars(id, rows, labelKey) {
-      const max = Math.max(...rows.map(r => Number(r.gross_profit || 0)), 1);
-      document.getElementById(id).innerHTML = rows.length ? rows.map(r => {
-        const width = Math.max(3, (Number(r.gross_profit || 0) / max) * 100);
-        return `<div class="bar"><span>${r[labelKey]}</span><div class="track"><div class="fill" style="width:${width}%"></div></div><strong>${money(r.gross_profit)}</strong></div>`;
-      }).join('') : '<div class="muted">No data yet. Import Excel or seed test data.</div>';
-    }
-
-    function renderMiniJobs() {
-      const rows = jobsData.slice(0, 10);
-      document.getElementById('jobs').innerHTML = rows.length ? rows.map(jobRow).join('') : '<tr><td colspan="9" class="muted">No jobs in database yet. Import Excel to begin.</td></tr>';
-    }
-
-    function jobRow(j) {
-      return `<tr><td>${j.job_number || ''}</td><td>${j.job_date ? String(j.job_date).slice(0,10) : ''}</td><td>${j.invoice_number || ''}</td><td>${j.division || ''}</td><td>${j.ops_manager || ''}</td><td>${Number(j.hours || 0).toFixed(1)}</td><td>${money(j.revenue)}</td><td>${money(j.total_cost)}</td><td class="profit">${money(j.gross_profit)}</td></tr>`;
-    }
-
-    function renderFilters() {
-      const divisions = [...new Set(jobsData.map(j => j.division).filter(Boolean))].sort();
-      const ops = [...new Set(jobsData.map(j => j.ops_manager).filter(Boolean))].sort();
-      document.getElementById('divisionFilter').innerHTML = '<option value="">All divisions</option>' + divisions.map(v => `<option>${v}</option>`).join('');
-      document.getElementById('opsFilter').innerHTML = '<option value="">All OPS managers</option>' + ops.map(v => `<option>${v}</option>`).join('');
-    }
-
-    function renderJobsTable() {
-      const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
-      const division = document.getElementById('divisionFilter')?.value || '';
-      const ops = document.getElementById('opsFilter')?.value || '';
-      const filtered = jobsData.filter(j => {
-        const text = `${j.job_number} ${j.invoice_number} ${j.division} ${j.ops_manager}`.toLowerCase();
-        return (!search || text.includes(search)) && (!division || j.division === division) && (!ops || j.ops_manager === ops);
-      });
-      const target = document.getElementById('jobsFull');
-      if (target) target.innerHTML = filtered.length ? filtered.map(jobRow).join('') : '<tr><td colspan="9" class="muted">No matching jobs.</td></tr>';
-    }
-
-    function renderImports() {
-      const target = document.getElementById('importsTable');
-      if (!target) return;
-      target.innerHTML = importsData.length ? importsData.map(i => `<tr><td>${i.filename}</td><td>${i.imported_rows}</td><td>${i.status}</td><td>${i.imported_at ? new Date(i.imported_at).toLocaleString() : ''}</td></tr>`).join('') : '<tr><td colspan="4" class="muted">No imports yet.</td></tr>';
-    }
-
-    async function uploadExcel() {
-      const fileInput = document.getElementById('excelFile');
-      const msg = document.getElementById('importMessage');
-      if (!fileInput.files.length) {
-        msg.textContent = 'Please choose an Excel file first.';
-        msg.className = 'status error';
-        return;
-      }
-      const form = new FormData();
-      form.append('file', fileInput.files[0]);
-      msg.textContent = 'Uploading and importing...';
-      msg.className = 'status';
-      try {
-        const result = await api('/api/imports/excel', { method: 'POST', body: form });
-        msg.textContent = `Imported ${result.importedRows} rows from ${result.sheet}.`;
-        msg.className = 'status ok';
-        await loadAll();
-        showView('dashboard');
-      } catch (error) {
-        msg.textContent = error.message;
-        msg.className = 'status error';
-      }
-    }
-
-    async function seedTestData() {
-      const msg = document.getElementById('importMessage');
-      msg.textContent = 'Seeding test data...';
-      msg.className = 'status';
-      try {
-        const result = await api('/api/imports/test-seed', { method: 'POST' });
-        msg.textContent = `Seeded ${result.rows} test jobs.`;
-        msg.className = 'status ok';
-        await loadAll();
-        showView('dashboard');
-      } catch (error) {
-        msg.textContent = error.message;
-        msg.className = 'status error';
-      }
-    }
-
-    function downloadJobsCsv() {
-      const rows = [['Job','Date','Invoice','Division','OPS','Hours','Revenue','Total Cost','Profit'], ...jobsData.map(j => [j.job_number, j.job_date, j.invoice_number, j.division, j.ops_manager, j.hours, j.revenue, j.total_cost, j.gross_profit])];
-      const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'b4-jobs-export.csv';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    loadAll().catch(error => {
-      document.getElementById('apiStatus').textContent = error.message;
-      document.getElementById('apiStatus').className = 'status error';
-    });
-  </script>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Nautilus Enterprise</title><style>
+:root{--navy:#061826;--cyan:#19b4d8;--green:#16a34a;--orange:#f59e0b;--red:#ef4444;--bg:#f3f7fb;--card:#fff;--text:#102030;--muted:#64748b}*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}.sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:linear-gradient(180deg,var(--navy),#0b2940);color:#fff;padding:24px 18px}.logo{font-size:24px;font-weight:800}.sub{font-size:12px;opacity:.75;margin:4px 0 28px}.nav a{display:block;color:#d8eff7;text-decoration:none;padding:12px 14px;border-radius:12px;margin:5px 0;cursor:pointer}.nav a.active,.nav a:hover{background:rgba(255,255,255,.12);color:#fff}.main{margin-left:260px;padding:28px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:12px}.h1{font-size:30px;font-weight:800}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}.card{background:var(--card);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.07);border:1px solid #e6eef5}.label{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.06em}.value{font-size:26px;font-weight:850;margin-top:8px}.good{color:var(--green)}.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}h2{margin:0 0 12px;font-size:18px}.bar{display:flex;align-items:center;gap:12px;margin:11px 0}.bar span{width:110px;font-size:13px;color:#334155}.track{flex:1;background:#e7eef5;border-radius:999px;height:12px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--cyan),#0f766e);border-radius:999px}.bar strong{width:130px;text-align:right;font-size:13px}table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;color:var(--muted);border-bottom:1px solid #e2e8f0;padding:12px;background:#f8fafc}td{padding:12px;border-bottom:1px solid #edf2f7}tr:hover{background:#f8fbff}.btn{background:var(--cyan);color:#fff;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}.btn.secondary{background:#0f766e}.btn.orange{background:var(--orange)}.muted{color:var(--muted)}.profit{font-weight:800;color:#047857}.danger{color:var(--red);font-weight:800}.hidden{display:none!important}.status{padding:10px 12px;border-radius:12px;background:#eef7ff;color:#07506a;font-weight:700;font-size:13px}.status.error{background:#fee2e2;color:#991b1b}.status.ok{background:#dcfce7;color:#166534}.upload{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.upload input,.filters input,.filters select{background:#fff;border:1px solid #d7e2ec;border-radius:12px;padding:10px}.small{font-size:12px;color:var(--muted);margin-top:5px}.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}.summary div{background:#f8fafc;border:1px solid #e6eef5;border-radius:14px;padding:12px}.summary strong{display:block;font-size:20px;margin-top:4px}@media(max-width:1000px){.sidebar{position:relative;width:auto}.main{margin-left:0}.grid,.row,.summary{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style></head><body><aside class="sidebar"><div class="logo">Nautilus</div><div class="sub">B4 Engineering & Diving operations</div><nav class="nav"><a class="active" data-view="dashboard">Executive Dashboard</a><a data-view="jobs">Financial Jobs</a><a data-view="register">Job Register</a><a data-view="cards">Job Cards</a><a data-view="salaries">Salaries</a><a data-view="imports">Import Excel</a><a data-view="reports">Reports</a><a data-view="settings">Settings</a></nav></aside><main class="main"><div class="top"><div><div class="h1" id="pageTitle">Executive Dashboard</div><div class="muted">Live profitability view from PostgreSQL and imported Excel job data</div></div><div id="apiStatus" class="status">Checking database...</div></div>
+<section id="dashboardView"><section class="grid" id="kpis"></section><section class="row"><div class="card"><h2>Profit by Division</h2><div id="divisions"></div></div><div class="card"><h2>OPS Manager Performance</h2><div id="ops"></div></div></section><section class="card"><div class="top" style="margin-bottom:0"><h2>Latest Financial Jobs</h2><div><button class="btn" onclick="showView('imports')">Import Excel</button> <button class="btn secondary" onclick="downloadJobsCsv()">Export CSV</button></div></div><table><thead><tr><th>Job</th><th>Date</th><th>Invoice</th><th>Division</th><th>OPS</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th></tr></thead><tbody id="jobs"></tbody></table></section></section>
+<section id="jobsView" class="hidden"><section class="card"><div class="top"><h2>Financial Jobs from Data Sheet</h2><button class="btn" onclick="loadAll()">Refresh</button></div><div class="filters"><input id="searchInput" placeholder="Search job, invoice, division, OPS" oninput="renderJobsTable()"><select id="divisionFilter" onchange="renderJobsTable()"><option value="">All divisions</option></select><select id="opsFilter" onchange="renderJobsTable()"><option value="">All OPS managers</option></select></div><table><thead><tr><th>Job</th><th>Date</th><th>Invoice</th><th>Division</th><th>OPS</th><th>Hours</th><th>Revenue</th><th>Total Cost</th><th>Profit</th></tr></thead><tbody id="jobsFull"></tbody></table></section></section>
+<section id="registerView" class="hidden"><section class="card"><h2>Job Register Sheet</h2><p class="muted">Master operational register: client, description, quotes, PO numbers, invoices and feedback.</p><table><thead><tr><th>Job</th><th>Date</th><th>Client</th><th>Description</th><th>Division</th><th>OPS</th><th>Quote</th><th>PO</th><th>Invoice</th></tr></thead><tbody id="registerTable"></tbody></table></section></section>
+<section id="cardsView" class="hidden"><section class="card"><h2>Job Card Conversion Sheet</h2><p class="muted">Operational job-card rows: time, hours and cost data used for job-card production.</p><table><thead><tr><th>Job</th><th>Date</th><th>OPS</th><th>Description</th><th>Start</th><th>End</th><th>Hours</th><th>Labour</th><th>Equipment</th><th>Workshop</th><th>Division</th></tr></thead><tbody id="cardsTable"></tbody></table></section></section>
+<section id="salariesView" class="hidden"><section class="card"><h2>Salaries Sheet</h2><p class="muted">Imported monthly salary totals for labour trend analysis.</p><table><thead><tr><th>Year</th><th>Month</th><th>Total Salaries</th><th>Imported At</th></tr></thead><tbody id="salariesTable"></tbody></table></section></section>
+<section id="importsView" class="hidden"><section class="card"><div class="top"><div><h2>Import Excel Workbook</h2><div class="muted">Upload the B4 Excel file. The system replaces current operational data and rebuilds dashboards.</div></div></div><div class="upload"><input id="excelFile" type="file" accept=".xlsx,.xls,.csv"><button class="btn" onclick="uploadExcel()">Upload & Import</button><button class="btn orange" onclick="seedTestData()">Seed Test Data</button></div><div class="small">Imports Data, Job Register, Job Card Conversion and Salaries sheets where available.</div><div id="importMessage" class="status hidden" style="margin-top:16px"></div><div id="importSummary" class="summary hidden"></div></section><section class="card" style="margin-top:18px"><h2>Import History</h2><table><thead><tr><th>Filename</th><th>Rows</th><th>Status</th><th>Imported At</th></tr></thead><tbody id="importsTable"></tbody></table></section></section>
+<section id="reportsView" class="hidden"><section class="card"><h2>Reports</h2><p class="muted">Next build: monthly revenue trend, division report, OPS manager report and PDF exports.</p></section></section><section id="settingsView" class="hidden"><section class="card"><h2>Settings</h2><p class="muted">Next build: company profile, users, roles, divisions, VAT and subscription plan.</p></section></section></main>
+<script>
+let dashboardData=null,jobsData=[],importsData=[],registerData=[],cardsData=[],salariesData=[];const money=n=>'N$ '+Math.round(Number(n||0)).toLocaleString();const num=n=>Number(n||0).toLocaleString();const pct=n=>`${(Number(n||0)*100).toFixed(1)}%`;const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function showView(view){for(const id of ['dashboardView','jobsView','registerView','cardsView','salariesView','importsView','reportsView','settingsView'])document.getElementById(id).classList.add('hidden');document.getElementById(view+'View').classList.remove('hidden');document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===view));document.getElementById('pageTitle').textContent=document.querySelector(`.nav a[data-view="${view}"]`)?.textContent||'Nautilus';if(view==='jobs')renderJobsTable();if(view==='imports')renderImports();if(view==='register')renderRegister();if(view==='cards')renderCards();if(view==='salaries')renderSalaries()}
+document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>showView(a.dataset.view)));async function api(path,options){const res=await fetch(path,options);if(!res.ok){const body=await res.json().catch(()=>({}));throw new Error(body.error||`Request failed: ${res.status}`)}return res.json()}
+async function checkStatus(){const el=document.getElementById('apiStatus');try{const s=await api('/api/status');el.textContent=s.database==='connected'?'Database connected':'Database not connected';el.className=s.database==='connected'?'status ok':'status error'}catch(e){el.textContent='API offline';el.className='status error'}}
+async function loadAll(){await checkStatus();dashboardData=await api('/api/dashboard');jobsData=await api('/api/jobs?limit=500');importsData=await api('/api/imports');registerData=await api('/api/job-register?limit=500').catch(()=>[]);cardsData=await api('/api/job-cards?limit=500').catch(()=>[]);salariesData=await api('/api/salaries').catch(()=>[]);renderDashboard();renderFilters();renderJobsTable();renderImports();renderRegister();renderCards();renderSalaries()}
+function renderDashboard(){const t=dashboardData?.totals||{};const gp=Number(t.revenue||0)>0?Number(t.gross_profit||0)/Number(t.revenue||1):0;const cards=[['Revenue Excl VAT',money(t.revenue)],['Gross Profit',money(t.gross_profit),'good'],['GP %',pct(gp)],['Financial Jobs',num(t.jobs)],['Labour Cost',money(t.labour_cost)],['Equipment Cost',money(t.equipment_cost)],['Workshop Cost',money(t.workshop_cost)],['Total Cost',money(t.total_cost)]];document.getElementById('kpis').innerHTML=cards.map(c=>`<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2]||''}">${c[1]}</div></div>`).join('');renderBars('divisions',dashboardData?.divisions||[],'division');renderBars('ops',dashboardData?.opsManagers||[],'ops_manager');renderMiniJobs()}
+function renderBars(id,rows,labelKey){const max=Math.max(...rows.map(r=>Number(r.gross_profit||0)),1);document.getElementById(id).innerHTML=rows.length?rows.map(r=>`<div class="bar"><span>${esc(r[labelKey])}</span><div class="track"><div class="fill" style="width:${Math.max(3,(Number(r.gross_profit||0)/max)*100)}%"></div></div><strong>${money(r.gross_profit)}</strong></div>`).join(''):'<div class="muted">No data yet. Import Excel or seed test data.</div>'}
+function jobRow(j){return `<tr><td>${esc(j.job_number)}</td><td>${j.job_date?String(j.job_date).slice(0,10):''}</td><td>${esc(j.invoice_number)}</td><td>${esc(j.division)}</td><td>${esc(j.ops_manager)}</td><td>${Number(j.hours||0).toFixed(1)}</td><td>${money(j.revenue)}</td><td>${money(j.total_cost)}</td><td class="${Number(j.gross_profit)<0?'danger':'profit'}">${money(j.gross_profit)}</td></tr>`}function renderMiniJobs(){document.getElementById('jobs').innerHTML=jobsData.slice(0,10).map(jobRow).join('')||'<tr><td colspan="9" class="muted">No jobs in database yet.</td></tr>'}
+function renderFilters(){const d=[...new Set(jobsData.map(j=>j.division).filter(Boolean))].sort(),o=[...new Set(jobsData.map(j=>j.ops_manager).filter(Boolean))].sort();document.getElementById('divisionFilter').innerHTML='<option value="">All divisions</option>'+d.map(v=>`<option>${esc(v)}</option>`).join('');document.getElementById('opsFilter').innerHTML='<option value="">All OPS managers</option>'+o.map(v=>`<option>${esc(v)}</option>`).join('')}
+function renderJobsTable(){const search=(document.getElementById('searchInput')?.value||'').toLowerCase(),division=document.getElementById('divisionFilter')?.value||'',ops=document.getElementById('opsFilter')?.value||'';const filtered=jobsData.filter(j=>`${j.job_number} ${j.invoice_number} ${j.division} ${j.ops_manager}`.toLowerCase().includes(search)&&(!division||j.division===division)&&(!ops||j.ops_manager===ops));const target=document.getElementById('jobsFull');if(target)target.innerHTML=filtered.map(jobRow).join('')||'<tr><td colspan="9" class="muted">No matching jobs.</td></tr>'}
+function renderRegister(){document.getElementById('registerTable').innerHTML=registerData.map(r=>`<tr><td>${esc(r.job_number)}</td><td>${r.job_date?String(r.job_date).slice(0,10):''}</td><td>${esc(r.client_name)}</td><td>${esc(r.description)}</td><td>${esc(r.division)}</td><td>${esc(r.ops_manager)}</td><td>${esc(r.quote_number)}</td><td>${esc(r.po_number)}</td><td>${esc(r.invoice_number)}</td></tr>`).join('')||'<tr><td colspan="9" class="muted">No Job Register rows imported yet.</td></tr>'}
+function renderCards(){document.getElementById('cardsTable').innerHTML=cardsData.map(r=>`<tr><td>${esc(r.job_number)}</td><td>${r.job_date?String(r.job_date).slice(0,10):''}</td><td>${esc(r.ops_manager)}</td><td>${esc(r.description)}</td><td>${esc(r.start_time)}</td><td>${esc(r.end_time)}</td><td>${Number(r.hours||0).toFixed(2)}</td><td>${money(r.labour_cost)}</td><td>${money(r.equipment_cost)}</td><td>${money(r.workshop_cost)}</td><td>${esc(r.division)}</td></tr>`).join('')||'<tr><td colspan="11" class="muted">No Job Card rows imported yet.</td></tr>'}
+function renderSalaries(){document.getElementById('salariesTable').innerHTML=salariesData.map(r=>`<tr><td>${esc(r.salary_year)}</td><td>${esc(r.salary_month)}</td><td>${money(r.total_salaries)}</td><td>${r.imported_at?new Date(r.imported_at).toLocaleString():''}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">No salary rows imported yet.</td></tr>'}
+function renderImports(){const t=document.getElementById('importsTable');if(t)t.innerHTML=importsData.map(i=>`<tr><td>${esc(i.filename)}</td><td>${esc(i.imported_rows)}</td><td>${esc(i.status)}</td><td>${i.imported_at?new Date(i.imported_at).toLocaleString():''}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">No imports yet.</td></tr>'}
+function showImportSummary(r){const box=document.getElementById('importSummary');box.className='summary';box.innerHTML=`<div><span class="label">Data rows</span><strong>${num(r.importedRows)}</strong></div><div><span class="label">Job Register</span><strong>${num(r.registerRows||0)}</strong></div><div><span class="label">Job Cards</span><strong>${num(r.cardRows||0)}</strong></div><div><span class="label">Salaries</span><strong>${num(r.salaryRows||0)}</strong></div><div><span class="label">Skipped</span><strong>${num(r.skippedRows||0)}</strong></div>`}
+async function uploadExcel(){const fileInput=document.getElementById('excelFile'),msg=document.getElementById('importMessage');if(!fileInput.files.length){msg.textContent='Please choose an Excel file first.';msg.className='status error';return}const form=new FormData();form.append('file',fileInput.files[0]);msg.textContent='Uploading and importing all workbook sheets...';msg.className='status';try{const result=await api('/api/imports/excel',{method:'POST',body:form});msg.textContent=`Imported workbook. Main sheet: ${result.sheet}. Data ${result.importedRows}, Register ${result.registerRows||0}, Job Cards ${result.cardRows||0}, Salaries ${result.salaryRows||0}.`;msg.className='status ok';showImportSummary(result);await loadAll();showView('dashboard')}catch(e){msg.textContent=e.message;msg.className='status error'}}
+async function seedTestData(){const msg=document.getElementById('importMessage');msg.textContent='Seeding test data...';msg.className='status';try{const r=await api('/api/imports/test-seed',{method:'POST'});msg.textContent=`Seeded ${r.rows} test jobs.`;msg.className='status ok';await loadAll();showView('dashboard')}catch(e){msg.textContent=e.message;msg.className='status error'}}
+function downloadJobsCsv(){const rows=[['Job','Date','Invoice','Division','OPS','Hours','Revenue','Total Cost','Profit'],...jobsData.map(j=>[j.job_number,j.job_date,j.invoice_number,j.division,j.ops_manager,j.hours,j.revenue,j.total_cost,j.gross_profit])];const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='b4-jobs-export.csv';a.click();URL.revokeObjectURL(url)}
+loadAll().catch(e=>{document.getElementById('apiStatus').textContent=e.message;document.getElementById('apiStatus').className='status error'});
+</script></body></html>
