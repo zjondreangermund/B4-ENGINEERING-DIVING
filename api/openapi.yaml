@@ -1,0 +1,61 @@
+openapi: 3.0.3
+info:
+  title: Nautilus Enterprise API
+  version: 0.1.0
+paths:
+  /auth/login:
+    post:
+      summary: Login user
+      responses:
+        '200': { description: OK }
+  /dashboard/summary:
+    get:
+      summary: Executive dashboard KPIs
+      parameters:
+        - { name: year, in: query, schema: { type: integer } }
+        - { name: month, in: query, schema: { type: string } }
+        - { name: divisionId, in: query, schema: { type: string } }
+        - { name: opsManagerId, in: query, schema: { type: string } }
+      responses:
+        '200': { description: Dashboard summary }
+  /jobs:
+    get:
+      summary: List jobs
+      responses:
+        '200': { description: Jobs list }
+    post:
+      summary: Create job
+      responses:
+        '201': { description: Created }
+  /jobs/{id}:
+    get:
+      summary: Get job details
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Job details }
+    patch:
+      summary: Update job
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Updated }
+  /imports/excel:
+    post:
+      summary: Upload Excel workbook for staging
+      responses:
+        '202': { description: Accepted }
+  /imports/{batchId}/validate:
+    post:
+      summary: Validate import batch
+      parameters:
+        - { name: batchId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Validation result }
+  /imports/{batchId}/commit:
+    post:
+      summary: Commit approved import batch
+      parameters:
+        - { name: batchId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Import committed }
