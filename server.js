@@ -507,7 +507,7 @@ app.get('/api/job-register', async (request) => {
 });
 
 app.get('/api/job-cards', async (request) => {
-  const limit = Math.min(Number(request.query?.limit || 200), 1000);
+  const limit = Math.min(Number(request.query?.limit || 5000), 5000);
 
   const result = await pool.query(
     `
