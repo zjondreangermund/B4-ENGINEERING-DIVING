@@ -653,17 +653,65 @@ async function importWorkbook(buffer, filename) {
 
     const jrSheet = findSheet(workbook, ['Job Register', 'JobRegister', 'Register']);
 
-    if (jrSheet) {
-      app.log.info(`Found Job Register sheet: ${jrSheet}`);
+if (jrSheet) {
+  app.log.info(`Found Job Register sheet: ${jrSheet}`);
 
-      for (const row of rowsFromSheet(workbook, jrSheet)) {
-        const jobNumber = pick(row, FIELD_ALIASES.jobNumber);
-        const description = pick(row, FIELD_ALIASES.description);
-        const jobDate = toDate(pick(row, FIELD_ALIASES.jobDate));
+  const registerSheet = workbook.Sheets[jrSheet];
 
-        if (!jobNumber && !description) continue;
+  // Job Register headers are on Excel row 2, so range: 1 uses row 2 as headers.
+  const registerRowsRaw = XLSX.utils.sheet_to_json(registerSheet, {
+    defval: '',
+    range: 1,
+  });
 
-        await client.query(
+  for (const row of registerRowsRaw) {
+    const jobNumber = pick(row, FIELD_ALIASES.jobNumber);
+    const description = pick(row, FIELD_ALIASES.description);
+    const jobDate = toDate(pick(row, FIELD_ALIASES.jobDate));
+
+    if (!jobNumber && !description) continue;
+
+    await client.query(
+      `
+      INSERT INTO job_register_entries (
+        job_number,
+        job_date,
+        ops_manager,
+        division,
+        client_name,
+        description,
+        completion_date,
+        quote_number,
+        po_number,
+        report_reference,
+        invoice_number,
+        client_feedback,
+        value_incl_vat,
+        value_excl_vat
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+      `,
+      [
+        jobNumber ? String(jobNumber) : null,
+        jobDate,
+        pick(row, FIELD_ALIASES.opsManager) || null,
+        pick(row, FIELD_ALIASES.division) || null,
+        pick(row, FIELD_ALIASES.client) || null,
+        description || null,
+        toDate(row['Completion_'] || row['Completion_Date'] || row['Completion Date']),
+        pick(row, FIELD_ALIASES.quoteNumber) || null,
+        pick(row, FIELD_ALIASES.poNumber) || null,
+        row.issued || row['Report No. and date issued'] || row.Report || null,
+        pick(row, FIELD_ALIASES.invoiceNumber) || null,
+        row.Form || row['Client Feed Back Form'] || row['Client Feedback'] || null,
+        toNumber(row.Value_incl_Vat || row['Value Incl VAT']),
+        toNumber(row.Value_excl_Va || row.Value_excl_Vat || row['Value Excl VAT']),
+      ]
+    );
+
+    registerRows += 1;
+  }
+}
           `
           INSERT INTO job_register_entries (
             job_number,
