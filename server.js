@@ -426,7 +426,7 @@ app.get('/api/status', async () => {
 });
 
 app.get('/api/jobs', async (request) => {
-  const limit = Math.min(Number(request.query?.limit || 100), 500);
+  const limit = Math.min(Number(request.query?.limit || 5000), 5000);
 
   const result = await pool.query(
     `
