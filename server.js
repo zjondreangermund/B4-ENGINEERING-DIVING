@@ -21,20 +21,83 @@ const pool = new Pool({
 });
 
 const FIELD_ALIASES = {
-  jobNumber: ['Job Nr', 'Job No', 'Job Number', 'Job', 'Job Nr.', 'Job #', 'Job_No', 'JobNo', 'JobNr'],
-  invoiceNumber: ['Invoice No', 'Invoice Number', 'Invoice', 'Invoice No.', 'Inv No', 'Invoice_No'],
+  jobNumber: [
+    'Job Nr',
+    'Job No',
+    'Job Number',
+    'Job',
+    'Job Nr.',
+    'Job #',
+    'Job_No',
+    'Job_Nr',
+    'JobNo',
+    'JobNr',
+  ],
+  invoiceNumber: [
+    'Invoice No',
+    'Invoice Number',
+    'Invoice',
+    'Invoice No.',
+    'Inv No',
+    'Invoice_No',
+    'Invoice No.',
+  ],
   jobDate: ['Date', 'Job Date', 'Start Date'],
-  division: ['Division', 'Division '],
-  opsManager: ['OPS Manager', 'OPS manager', 'Operations Manager', 'Ops Manager', 'Divison Head', 'Division Head'],
-  description: ['Description', 'Job/Project_Description', 'Job Project Description', 'Job Description', 'Column1'],
+  division: ['Division', 'Division ', 'Divisio'],
+  opsManager: [
+    'OPS Manager',
+    'OPS manager',
+    'Operations Manager',
+    'Ops Manager',
+    'Divison Head',
+    'Division Head',
+    'Divison H',
+  ],
+  description: [
+    'Description',
+    'Job/Project_Description',
+    'Job Project Description',
+    'Job Description',
+    'Column1',
+  ],
   client: ['Client', 'Customer', 'Client Name'],
   quoteNumber: ['Quote_Nr', 'Quote Nr', 'Quote Number', 'Quote No'],
   poNumber: ['PO_No', 'PO No', 'PO Number', 'PO'],
   hours: ['Total Hours', 'Hours', 'Hour'],
-  revenue: ['Revenue Excl VAT', 'Revenue Excl', 'Revenue', 'Revenue Ex VAT', 'Revenue excluding VAT', ' Revenue Excl VAT'],
-  revenueInclVat: ['Revenue Incl VAT', 'Revenue Incl', 'Revenue Inc VAT', 'Revenue Including VAT'],
-  labourCost: ['Labour Costs', 'Labour Cost', 'Cost Labour', 'Labor Costs', 'Labor Cost', ' Labour_Costs'],
-  equipmentCost: ['Equipment Costs', 'Equipment Cost', 'Cost Equipment', ' Equipment_Costs'],
+  revenue: [
+    'Revenue Excl VAT',
+    'Revenue Excl',
+    'Revenue',
+    'Revenue Ex VAT',
+    'Revenue excluding VAT',
+    ' Revenue Excl VAT',
+    'Value_excl_Va',
+    'Value_excl_Vat',
+    'Value Excl Vat',
+    'Value Excl VAT',
+  ],
+  revenueInclVat: [
+    'Revenue Incl VAT',
+    'Revenue Incl',
+    'Revenue Inc VAT',
+    'Revenue Including VAT',
+    'Value_incl_Vat',
+    'Value Incl VAT',
+  ],
+  labourCost: [
+    'Labour Costs',
+    'Labour Cost',
+    'Cost Labour',
+    'Labor Costs',
+    'Labor Cost',
+    ' Labour_Costs',
+  ],
+  equipmentCost: [
+    'Equipment Costs',
+    'Equipment Cost',
+    'Cost Equipment',
+    ' Equipment_Costs',
+  ],
   workshopCost: ['Workshop Cost', 'Workshop Costs', ' Workshop Cost'],
   totalCost: ['Total Costs', 'Total Cost', ' Total_Costs'],
 };
@@ -48,7 +111,10 @@ function normalizeHeader(value) {
 
 function toNumber(value) {
   if (value === null || value === undefined || value === '') return 0;
-  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : 0;
+  }
 
   const parsed = Number(String(value).replace(/[^0-9.-]/g, ''));
   return Number.isFinite(parsed) ? parsed : 0;
@@ -79,17 +145,20 @@ function toTime(value) {
     const totalMinutes = Math.round((value % 1) * 24 * 60);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
+
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   }
 
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
     const hours = value.getUTCHours();
     const minutes = value.getUTCMinutes();
+
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   }
 
   const text = String(value);
   const match = text.match(/(\d{1,2}:\d{2})/);
+
   return match ? match[1] : text;
 }
 
@@ -125,12 +194,21 @@ function findHeaderRow(sheet) {
     blankrows: false,
   });
 
-  let best = { rowIndex: 0, score: 0, headers: [] };
+  let best = {
+    rowIndex: 0,
+    score: 0,
+    headers: [],
+  };
 
   matrix.slice(0, 80).forEach((row, rowIndex) => {
     const score = headerScore(row);
+
     if (score > best.score) {
-      best = { rowIndex, score, headers: row };
+      best = {
+        rowIndex,
+        score,
+        headers: row,
+      };
     }
   });
 
@@ -166,7 +244,12 @@ function chooseBestSheet(workbook) {
       row.some((cell) => String(cell || '').trim() !== '')
     ).length;
 
-    const result = { sheetName, sheet, header, nonEmptyRows };
+    const result = {
+      sheetName,
+      sheet,
+      header,
+      nonEmptyRows,
+    };
 
     if (
       !best ||
@@ -258,8 +341,20 @@ async function initDatabase() {
       report_reference TEXT,
       invoice_number TEXT,
       client_feedback TEXT,
+      value_incl_vat NUMERIC DEFAULT 0,
+      value_excl_vat NUMERIC DEFAULT 0,
       imported_at TIMESTAMP DEFAULT NOW()
     );
+  `);
+
+  await pool.query(`
+    ALTER TABLE job_register_entries
+    ADD COLUMN IF NOT EXISTS value_incl_vat NUMERIC DEFAULT 0;
+  `);
+
+  await pool.query(`
+    ALTER TABLE job_register_entries
+    ADD COLUMN IF NOT EXISTS value_excl_vat NUMERIC DEFAULT 0;
   `);
 
   await pool.query(`
@@ -313,6 +408,7 @@ app.get('/health', async () => ({
 app.get('/api/status', async () => {
   try {
     const db = await pool.query('SELECT NOW() AS now');
+
     return {
       app: 'B4 Nautilus Operations',
       status: 'running',
@@ -492,7 +588,8 @@ async function importWorkbook(buffer, filename) {
       const equipmentCost = toNumber(pick(row, FIELD_ALIASES.equipmentCost));
       const workshopCost = toNumber(pick(row, FIELD_ALIASES.workshopCost));
       const totalCostFromSheet = toNumber(pick(row, FIELD_ALIASES.totalCost));
-      const totalCost = totalCostFromSheet || labourCost + equipmentCost + workshopCost;
+      const totalCost =
+        totalCostFromSheet || labourCost + equipmentCost + workshopCost;
       const grossProfit = revenue - totalCost;
 
       const hasFinancialData =
@@ -557,6 +654,8 @@ async function importWorkbook(buffer, filename) {
     const jrSheet = findSheet(workbook, ['Job Register', 'JobRegister', 'Register']);
 
     if (jrSheet) {
+      app.log.info(`Found Job Register sheet: ${jrSheet}`);
+
       for (const row of rowsFromSheet(workbook, jrSheet)) {
         const jobNumber = pick(row, FIELD_ALIASES.jobNumber);
         const description = pick(row, FIELD_ALIASES.description);
@@ -578,9 +677,11 @@ async function importWorkbook(buffer, filename) {
             po_number,
             report_reference,
             invoice_number,
-            client_feedback
+            client_feedback,
+            value_incl_vat,
+            value_excl_vat
           )
-          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
           `,
           [
             jobNumber ? String(jobNumber) : null,
@@ -589,12 +690,14 @@ async function importWorkbook(buffer, filename) {
             pick(row, FIELD_ALIASES.division) || null,
             pick(row, FIELD_ALIASES.client) || null,
             description || null,
-            toDate(row['Completion_Date'] || row['Completion Date']),
+            toDate(row['Completion_'] || row['Completion_Date'] || row['Completion Date']),
             pick(row, FIELD_ALIASES.quoteNumber) || null,
             pick(row, FIELD_ALIASES.poNumber) || null,
-            row['Report No. and date issued'] || row['Report'] || null,
+            row.issued || row['Report No. and date issued'] || row.Report || null,
             pick(row, FIELD_ALIASES.invoiceNumber) || null,
-            row['Client Feed Back Form'] || row['Client Feedback'] || null,
+            row.Form || row['Client Feed Back Form'] || row['Client Feedback'] || null,
+            toNumber(row.Value_incl_Vat || row['Value Incl VAT']),
+            toNumber(row.Value_excl_Va || row.Value_excl_Vat || row['Value Excl VAT']),
           ]
         );
 
@@ -631,9 +734,9 @@ async function importWorkbook(buffer, filename) {
           `,
           [
             toDate(pick(row, FIELD_ALIASES.jobDate)),
-            row['Month'] || null,
-            toNumber(row['Year']) || null,
-            row['FY'] ? String(row['FY']) : null,
+            row.Month || row['Month'] || null,
+            toNumber(row.Year || row['Year']) || null,
+            row.FY ? String(row.FY) : null,
             String(jobNumber),
             pick(row, FIELD_ALIASES.opsManager) || null,
             pick(row, FIELD_ALIASES.description) || null,
@@ -664,7 +767,10 @@ async function importWorkbook(buffer, filename) {
       matrix.forEach((row) => {
         row.forEach((cell, idx) => {
           if (Number(cell) >= 2020 && Number(cell) <= 2035) {
-            years.push({ year: Number(cell), col: idx });
+            years.push({
+              year: Number(cell),
+              col: idx,
+            });
           }
         });
       });
@@ -743,6 +849,7 @@ app.post('/api/imports/excel', async (request, reply) => {
     return result;
   } catch (error) {
     app.log.error(error);
+
     return reply.code(500).send({
       error: error.message,
     });
