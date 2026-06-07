@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nautilus OPS Scorecard</title>
+<link rel="stylesheet" href="/ops-scorecard.css">
+</head>
+<body>
+<aside class="sidebar"><div class="logo">Nautilus</div><div class="sub">B4 Engineering & Diving operations</div><nav class="nav"><a href="/index_replacement.html">← Main Dashboard</a><a href="/invoice-control.html">Invoice Control</a><a href="/debtors-collections.html">Debtors & Collections</a><a href="/data-quality.html">Data Quality</a><a class="active">OPS Scorecard</a></nav></aside>
+<main class="main">
+<div class="top"><div><div class="h1">OPS Manager Scorecard</div><div class="muted">Revenue, profit, hours, invoice coverage and issue ownership by OPS manager.</div></div><div id="apiStatus" class="status">Checking database...</div></div>
+<section class="grid" id="kpis"></section>
+<section class="two"><div class="card"><h2>Profit by OPS Manager</h2><div id="profitBars"></div></div><div class="card"><h2>Missing Invoice Value by OPS</h2><div id="invoiceBars"></div></div></section>
+<section class="card"><div class="top"><div><h2>OPS Manager Ranking</h2><div class="muted">Operational and financial accountability from the imported workbook.</div></div><button class="btn" onclick="exportOpsCsv()">Export CSV</button></div><div class="filters"><input id="search" placeholder="Search manager" oninput="render()"><select id="sort" onchange="render()"><option value="profit">Sort by profit</option><option value="revenue">Sort by revenue</option><option value="jobs">Sort by jobs</option><option value="missingValue">Sort by missing invoices</option><option value="lossJobs">Sort by loss jobs</option></select></div><div class="table-wrap"><table><thead><tr><th>OPS Manager</th><th>Jobs</th><th>Revenue</th><th>Total Cost</th><th>Profit</th><th>GP %</th><th>Hours</th><th>Revenue / Hour</th><th>Missing Invoices</th><th>Missing Invoice Value</th><th>Loss Jobs</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+</main>
+<script src="/ops-scorecard.js"></script>
+</body>
+</html>
