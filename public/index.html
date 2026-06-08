@@ -4,8 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Nautilus Enterprise</title>
-  <meta http-equiv="refresh" content="0; url=/index_replacement.html">
-  <script>window.location.replace('/index_replacement.html');</script>
 </head>
-<body></body>
+<body>
+  <noscript>Please enable JavaScript to use Nautilus Enterprise.</noscript>
+  <script>
+    fetch('/index_replacement.html', { cache: 'no-store' })
+      .then(function (response) { return response.text(); })
+      .then(function (html) {
+        html = html.replace("const paid=importedPaid>0?importedPaid:invoiceValue;", "const paid=importedPaid;");
+        document.open();
+        document.write(html);
+        document.close();
+      })
+      .catch(function () {
+        window.location.replace('/index_replacement.html' + window.location.hash);
+      });
+  </script>
+</body>
 </html>
