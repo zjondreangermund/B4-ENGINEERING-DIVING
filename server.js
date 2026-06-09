@@ -285,6 +285,260 @@ async function importWorkbook(buffer, filename) {
     client.release();
   }
 }
+const EXPORT_DATE_FORMAT = 'yyyy-mm-dd';
+const EXPORT_CURRENCY_FORMAT = 'N$ #,##0.00';
+
+function cleanExportRows(rows) {
+  return rows.map((row) => {
+    const out = {};
+    for (const [key, value] of Object.entries(row)) {
+      out[key] = value === null || value === undefined ? '' : value;
+    }
+    return out;
+  });
+}
+
+function applySheetFormats(worksheet, currencyColumns = [], dateColumns = []) {
+  const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+
+  for (let row = range.s.r + 1; row <= range.e.r; row += 1) {
+    for (const col of currencyColumns) {
+      const cell = worksheet[XLSX.utils.encode_cell({ r: row, c: col })];
+      if (cell && typeof cell.v === 'number') cell.z = EXPORT_CURRENCY_FORMAT;
+    }
+
+    for (const col of dateColumns) {
+      const cell = worksheet[XLSX.utils.encode_cell({ r: row, c: col })];
+      if (cell && cell.v) cell.z = EXPORT_DATE_FORMAT;
+    }
+  }
+
+  worksheet['!cols'] = Array.from(
+    { length: Math.max(1, range.e.c + 1) },
+    () => ({ wch: 18 })
+  );
+}
+
+function appendJsonSheet(workbook, sheetName, rows, currencyColumns = [], dateColumns = []) {
+  const worksheet = XLSX.utils.json_to_sheet(cleanExportRows(rows));
+  applySheetFormats(worksheet, currencyColumns, dateColumns);
+  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+}
+
+function sendWorkbook(reply, workbook, filename) {
+  const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+  reply
+    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    .header('Content-Disposition', `attachment; filename="${filename}"`)
+    .send(buffer);
+}
+
+async function getJobRegisterExportRows() {
+  const result = await pool.query(`
+    SELECT
+      job_number AS "Job Nr",
+      job_date AS "Date",
+      ops_manager AS "Division Head",
+      division AS "Division",
+      client_name AS "Client",
+      description AS "Description",
+      completion_date AS "Completion Date",
+      quote_number AS "Quote Nr",
+      po_number AS "PO No",
+      report_reference AS "Report Reference",
+      invoice_number AS "Invoice No",
+      client_feedback AS "Client Feedback",
+      value_incl_vat AS "Value Incl VAT",
+      value_excl_vat AS "Value Excl VAT",
+      payments_made AS "Payments Made"
+    FROM job_register_entries
+    ORDER BY job_date DESC NULLS LAST, id DESC
+  `);
+
+  return result.rows;
+}
+
+async function getJobCardsExportRows() {
+  const result = await pool.query(`
+    SELECT
+      job_date AS "Date",
+      month AS "Month",
+      year AS "Year",
+      fy AS "FY",
+      job_number AS "Job Nr",
+      ops_manager AS "OPS Manager",
+      description AS "Description",
+      start_time AS "Start Time",
+      end_time AS "End Time",
+      hours AS "Total Hours",
+      labour_cost AS "Labour Costs",
+      equipment_cost AS "Equipment Costs",
+      workshop_cost AS "Workshop Cost",
+      division AS "Division"
+    FROM job_card_entries
+    ORDER BY job_date DESC NULLS LAST, id DESC
+  `);
+
+  return result.rows;
+}
+
+async function getSalariesExportRows() {
+  const result = await pool.query(`
+    SELECT
+      salary_year AS "Year",
+      salary_month AS "Month",
+      total_salaries AS "Total Salaries"
+    FROM salaries
+    ORDER BY salary_year DESC, imported_at DESC, id DESC
+  `);
+
+  return result.rows;
+}
+
+async function getJobsExportRows() {
+  const result = await pool.query(`
+    SELECT
+      job_number AS "Job Nr",
+      invoice_number AS "Invoice No",
+      job_date AS "Date",
+      division AS "Division",
+      ops_manager AS "OPS Manager",
+      client_name AS "Client",
+      description AS "Description",
+      quote_number AS "Quote Nr",
+      po_number AS "PO No",
+      hours AS "Total Hours",
+      revenue AS "Revenue Excl VAT",
+      labour_cost AS "Labour Costs",
+      equipment_cost AS "Equipment Costs",
+      workshop_cost AS "Workshop Cost",
+      total_cost AS "Total Costs",
+      gross_profit AS "Gross Profit"
+    FROM jobs
+    ORDER BY job_date DESC NULLS LAST, id DESC
+  `);
+
+  return result.rows;
+}
+
+function buildAnalysisRows(jobs) {
+  const totals = jobs.reduce(
+    (acc, job) => {
+      acc.jobs += 1;
+      acc.hours += Number(job['Total Hours'] || 0);
+      acc.revenue += Number(job['Revenue Excl VAT'] || 0);
+      acc.labour += Number(job['Labour Costs'] || 0);
+      acc.equipment += Number(job['Equipment Costs'] || 0);
+      acc.workshop += Number(job['Workshop Cost'] || 0);
+      acc.cost += Number(job['Total Costs'] || 0);
+      acc.profit += Number(job['Gross Profit'] || 0);
+      return acc;
+    },
+    { jobs: 0, hours: 0, revenue: 0, labour: 0, equipment: 0, workshop: 0, cost: 0, profit: 0 }
+  );
+
+  return [
+    { Metric: 'Jobs', Value: totals.jobs },
+    { Metric: 'Total Hours', Value: totals.hours },
+    { Metric: 'Revenue Excl VAT', Value: totals.revenue },
+    { Metric: 'Labour Costs', Value: totals.labour },
+    { Metric: 'Equipment Costs', Value: totals.equipment },
+    { Metric: 'Workshop Cost', Value: totals.workshop },
+    { Metric: 'Total Costs', Value: totals.cost },
+    { Metric: 'Gross Profit', Value: totals.profit },
+    {
+      Metric: 'Gross Profit %',
+      Value: totals.revenue ? totals.profit / totals.revenue : 0,
+    },
+  ];
+}
+
+function buildProfitPerJobRows(jobs) {
+  return jobs.map((job) => {
+    const revenue = Number(job['Revenue Excl VAT'] || 0);
+    const profit = Number(job['Gross Profit'] || 0);
+
+    return {
+      'Job Nr': job['Job Nr'],
+      Date: job.Date,
+      Client: job.Client,
+      Division: job.Division,
+      'OPS Manager': job['OPS Manager'],
+      'Revenue Excl VAT': revenue,
+      'Total Costs': Number(job['Total Costs'] || 0),
+      'Gross Profit': profit,
+      'GP %': revenue ? profit / revenue : 0,
+    };
+  });
+}
+
+function buildSettingsRows() {
+  return [
+    { Setting: 'Company', Value: 'B4 Engineering & Diving / Nautilus Operations' },
+    { Setting: 'Currency', Value: 'N$' },
+    { Setting: 'Workbook Export Version', Value: 'Phase 1' },
+    { Setting: 'Debtors Logic', Value: 'Monitoring only - current invoices treated as paid by default unless payment data exists' },
+  ];
+}
+
+app.get('/api/export/job-register.xlsx', async (request, reply) => {
+  try {
+    const workbook = XLSX.utils.book_new();
+    appendJsonSheet(workbook, 'Job Register', await getJobRegisterExportRows(), [12, 13, 14], [1, 6]);
+    return sendWorkbook(reply, workbook, 'job-register.xlsx');
+  } catch (error) {
+    app.log.error(error);
+    return reply.code(500).send({ error: error.message });
+  }
+});
+
+app.get('/api/export/job-cards.xlsx', async (request, reply) => {
+  try {
+    const workbook = XLSX.utils.book_new();
+    appendJsonSheet(workbook, 'Job Card Conversion', await getJobCardsExportRows(), [10, 11, 12], [0]);
+    return sendWorkbook(reply, workbook, 'job-cards.xlsx');
+  } catch (error) {
+    app.log.error(error);
+    return reply.code(500).send({ error: error.message });
+  }
+});
+
+app.get('/api/export/salaries.xlsx', async (request, reply) => {
+  try {
+    const workbook = XLSX.utils.book_new();
+    appendJsonSheet(workbook, 'Salaries', await getSalariesExportRows(), [2], []);
+    return sendWorkbook(reply, workbook, 'salaries.xlsx');
+  } catch (error) {
+    app.log.error(error);
+    return reply.code(500).send({ error: error.message });
+  }
+});
+
+app.get('/api/export/full-workbook.xlsx', async (request, reply) => {
+  try {
+    const workbook = XLSX.utils.book_new();
+
+    const jobRegisterRows = await getJobRegisterExportRows();
+    const jobRows = await getJobsExportRows();
+    const jobCardRows = await getJobCardsExportRows();
+    const salaryRows = await getSalariesExportRows();
+
+    appendJsonSheet(workbook, 'Job Register', jobRegisterRows, [12, 13, 14], [1, 6]);
+    appendJsonSheet(workbook, 'Analysis', buildAnalysisRows(jobRows), [1], []);
+    appendJsonSheet(workbook, 'Profit per Job', buildProfitPerJobRows(jobRows), [5, 6, 7], [1]);
+    appendJsonSheet(workbook, 'Data', jobRows, [10, 11, 12, 13, 14, 15], [2]);
+    appendJsonSheet(workbook, 'Jobs', jobRows, [10, 11, 12, 13, 14, 15], [2]);
+    appendJsonSheet(workbook, 'Job Card Conversion', jobCardRows, [10, 11, 12], [0]);
+    appendJsonSheet(workbook, 'Settings', buildSettingsRows(), [], []);
+    appendJsonSheet(workbook, 'Salaries', salaryRows, [2], []);
+
+    return sendWorkbook(reply, workbook, 'b4-nautilus-full-workbook.xlsx');
+  } catch (error) {
+    app.log.error(error);
+    return reply.code(500).send({ error: error.message });
+  }
+});
 
 app.post('/api/imports/excel', async (request, reply) => {
   try {
