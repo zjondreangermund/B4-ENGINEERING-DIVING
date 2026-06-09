@@ -51,8 +51,31 @@
 <a data-view="reports">Reports</a>
 <a data-view="settings">Settings</a>
 </nav></aside>
+
 <main class="main">
-<div class="top"><div><div class="h1" id="pageTitle">Executive Dashboard</div><div class="muted" id="pageSub">Live profitability view from PostgreSQL and imported Excel job data</div></div><div id="apiStatus" class="status">Checking database...</div></div>
+
+<div class="top">
+
+  <div style="display:flex;align-items:center;gap:15px">
+
+    <img
+      src="/icons/icon-192.png"
+      alt="B-Four Engineering & Diving"
+      style="width:60px;height:60px;object-fit:contain"
+    >
+
+    <div>
+      <div class="h1" id="pageTitle">Executive Dashboard</div>
+      <div class="muted" id="pageSub">
+        Live profitability view from PostgreSQL and imported Excel job data
+      </div>
+    </div>
+
+  </div>
+
+  <div id="apiStatus" class="status">Checking database...</div>
+
+</div>
 <section id="dashboardView"><section class="grid" id="kpis"></section><section class="row"><div class="card"><h2>Profit by Division</h2><div id="profitDiv"></div></div><div class="card"><h2>Cost by Division</h2><div id="costDiv"></div></div><div class="card"><h2>OPS Manager Profit</h2><div id="opsProfit"></div></div></section><section class="card"><h2>Latest Financial Jobs</h2><div class="table-wrap"><table><thead><tr><th>Job</th><th>Date</th><th>Invoice</th><th>Division</th><th>OPS</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th></tr></thead><tbody id="latestJobs"></tbody></table></div></section></section>
 <section id="jobsView" class="hidden"><section class="card"><div class="top"><h2>Financial Jobs</h2><button class="btn" onclick="loadAll()">Refresh</button></div><div class="filters"><input id="jobSearch" placeholder="Search job, invoice, division, OPS" oninput="resetPage('jobs');renderJobs()"><select id="jobDivision" onchange="resetPage('jobs');renderJobs()"><option value="">All divisions</option></select><select id="jobOps" onchange="resetPage('jobs');renderJobs()"><option value="">All OPS managers</option></select><select id="jobsDateSort" onchange="resetPage('jobs');renderJobs()"><option value="desc">Newest date first</option><option value="asc">Oldest date first</option></select></div><div id="jobsPager"></div><div class="table-wrap"><table><thead><tr><th>Job</th><th>Date</th><th>Invoice</th><th>Division</th><th>OPS</th><th>Hours</th><th>Revenue</th><th>Total Cost</th><th>Profit</th></tr></thead><tbody id="jobsRows"></tbody></table></div></section></section>
 <section id="clientsView" class="hidden"><section class="card"><h2>Client Analytics</h2><div class="filters"><input id="clientSearch" placeholder="Search client" oninput="resetPage('clients');renderClients()"><select id="clientSort" onchange="resetPage('clients');renderClients()"><option value="profit">Sort by profit</option><option value="revenue">Sort by revenue</option><option value="jobs">Sort by jobs</option><option value="hours">Sort by hours</option></select></div><div id="clientsPager"></div><div class="table-wrap"><table><thead><tr><th>Client</th><th>Jobs</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>GP %</th></tr></thead><tbody id="clientRows"></tbody></table></div></section></section>
