@@ -22,7 +22,7 @@ const FIELD_ALIASES = {
   jobNumber: ['Job Nr','Job No','Job Number','Job','Job Nr.','Job #','Job_No','Job_Nr','JobNo','JobNr'],
   invoiceNumber: ['Invoice No','Invoice Number','Invoice','Invoice No.','Inv No','Invoice_No','Invoice No.'],
   jobDate: ['Date','Job Date','Start Date'],
-  division: ['Division','Division ','Divisio','Main Division'],
+  division: ['Main Division','Division','Division ','Divisio'],
   opsManager: ['OPS Manager','OPS manager','Operations Manager','Ops Manager','Divison Head','Division Head','Divison H'],
   description: ['Description','Job/Project_Description','Job Project Description','Job Description','Column1'],
   client: ['Client','Customer','Client Name'],
@@ -40,7 +40,7 @@ const FIELD_ALIASES = {
   expenseSupplier: ['Supplier','Vendor','Paid To','Creditor','Company'],
   expenseCategory: ['Category','Expense Category','Type','Expense Type','Account'],
   expenseDescription: ['Description','Details','Narrative','Item','Expense Description'],
-  expenseAmount: ['Amount','Value','Cost','Expense','Total','Total Cost','Incl VAT','Excl VAT','Total (without Tax)','Total (with Tax)','Total Without Tax','Total With Tax'],
+  expenseAmount: ['Total (without Tax)','Total Without Tax','Excl VAT','Total (with Tax)','Total With Tax','Incl VAT','Amount','Value','Cost','Expense','Total','Total Cost'],
   vessel: ['Vessel','Boat','Vessel Name'],
 };
 
@@ -181,6 +181,30 @@ function chooseFinancialSheet(workbook) {
   return best || chooseBestSheet(workbook);
 }
 
+function importKey(parts) {
+  return parts.map((part) => String(part ?? '').trim().toLowerCase()).join('|');
+}
+function coalesceText(...values) {
+  for (const value of values) {
+    const text = String(value ?? '').trim();
+    if (text) return text;
+  }
+  return null;
+}
+function detectExpenseVessel(row, description) {
+  const direct = normalizeVesselName(pick(row, FIELD_ALIASES.vessel));
+  if (direct && isVesselName(direct)) return direct;
+  const text = `${pick(row, FIELD_ALIASES.expenseCategory) || ''} ${row['Placement'] || ''} ${description || ''}`;
+  const key = normalizeHeader(text);
+  if (key.includes('dsvsaturn') || key.includes('saturn')) return 'DSV Saturn';
+  if (key.includes('ingwegwe')) return 'Ingwegwe';
+  if (key.includes('ingwena')) return 'Ingwena';
+  if (key.includes('dinghy') || key.includes('dingy')) return 'Dingy';
+  if (key.includes('flatcat')) return 'Flatcat';
+  if (key.includes('pumba')) return 'Pumba';
+  return null;
+}
+
 async function initDatabase() {
   if (!process.env.DATABASE_URL) {
     app.log.warn('DATABASE_URL is not set.');
@@ -204,6 +228,15 @@ async function initDatabase() {
   await pool.query(`CREATE TABLE IF NOT EXISTS expense_entries (id SERIAL PRIMARY KEY, expense_date DATE, month TEXT, supplier TEXT, category TEXT, description TEXT, division TEXT, vessel_name TEXT, amount NUMERIC DEFAULT 0, imported_at TIMESTAMP DEFAULT NOW());`);
   await pool.query(`CREATE INDEX IF NOT EXISTS expense_entries_expense_date_idx ON expense_entries (expense_date);`);
   await pool.query(`CREATE INDEX IF NOT EXISTS expense_entries_category_idx ON expense_entries (category);`);
+  await pool.query(`ALTER TABLE job_card_entries ADD COLUMN IF NOT EXISTS import_key TEXT;`);
+  await pool.query(`ALTER TABLE vessel_entries ADD COLUMN IF NOT EXISTS import_key TEXT;`);
+  await pool.query(`ALTER TABLE expense_entries ADD COLUMN IF NOT EXISTS import_key TEXT;`);
+  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS jobs_job_number_unique ON jobs (job_number) WHERE job_number IS NOT NULL;`);
+  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS job_register_job_number_unique ON job_register_entries (job_number) WHERE job_number IS NOT NULL;`);
+  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS job_cards_import_key_unique ON job_card_entries (import_key) WHERE import_key IS NOT NULL;`);
+  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS vessel_entries_import_key_unique ON vessel_entries (import_key) WHERE import_key IS NOT NULL;`);
+  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS expense_entries_import_key_unique ON expense_entries (import_key) WHERE import_key IS NOT NULL;`);
+  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS salaries_year_month_unique ON salaries (salary_year, salary_month);`);
 }
 
 await app.register(fastifyMultipart, { limits: { fileSize: 30 * 1024 * 1024 } });
@@ -220,13 +253,13 @@ app.get('/api/status', async () => {
 });
 app.get('/api/jobs', async (request) => {
   const limit = Math.min(Number(request.query?.limit || 5000), 5000);
-  const result = await pool.query(`SELECT * FROM jobs WHERE COALESCE(division,'') NOT IN ('Dingy','Ingwegwe','DSV Saturn','Flatcat','Ingwena','Pumba','Saturn') ORDER BY job_date DESC NULLS LAST, id DESC LIMIT $1`, [limit]);
+  const result = await pool.query(`SELECT * FROM jobs ORDER BY job_date DESC NULLS LAST, id DESC LIMIT $1`, [limit]);
   return result.rows;
 });
 app.get('/api/dashboard', async () => {
-  const totals = await pool.query(`SELECT COALESCE(SUM(revenue),0) AS revenue, COALESCE(SUM(labour_cost),0) AS labour_cost, COALESCE(SUM(equipment_cost),0) AS equipment_cost, COALESCE(SUM(workshop_cost),0) AS workshop_cost, COALESCE(SUM(total_cost),0) AS total_cost, COALESCE(SUM(gross_profit),0) AS gross_profit, COUNT(*) AS jobs FROM jobs WHERE COALESCE(division,'') NOT IN ('Dingy','Ingwegwe','DSV Saturn','Flatcat','Ingwena','Pumba','Saturn')`);
-  const divisions = await pool.query(`SELECT COALESCE(division,'Unassigned') AS division, COALESCE(SUM(gross_profit),0) AS gross_profit FROM jobs WHERE COALESCE(division,'') NOT IN ('Dingy','Ingwegwe','DSV Saturn','Flatcat','Ingwena','Pumba','Saturn') GROUP BY division ORDER BY gross_profit DESC`);
-  const opsManagers = await pool.query(`SELECT COALESCE(ops_manager,'Unassigned') AS ops_manager, COALESCE(SUM(gross_profit),0) AS gross_profit FROM jobs WHERE COALESCE(division,'') NOT IN ('Dingy','Ingwegwe','DSV Saturn','Flatcat','Ingwena','Pumba','Saturn') GROUP BY ops_manager ORDER BY gross_profit DESC`);
+  const totals = await pool.query(`SELECT COALESCE(SUM(revenue),0) AS revenue, COALESCE(SUM(labour_cost),0) AS labour_cost, COALESCE(SUM(equipment_cost),0) AS equipment_cost, COALESCE(SUM(workshop_cost),0) AS workshop_cost, COALESCE(SUM(total_cost),0) AS total_cost, COALESCE(SUM(gross_profit),0) AS gross_profit, COUNT(*) AS jobs FROM jobs`);
+  const divisions = await pool.query(`SELECT COALESCE(division,'Unassigned') AS division, COALESCE(SUM(gross_profit),0) AS gross_profit FROM jobs GROUP BY division ORDER BY gross_profit DESC`);
+  const opsManagers = await pool.query(`SELECT COALESCE(ops_manager,'Unassigned') AS ops_manager, COALESCE(SUM(gross_profit),0) AS gross_profit FROM jobs GROUP BY ops_manager ORDER BY gross_profit DESC`);
   return { totals: totals.rows[0], divisions: divisions.rows, opsManagers: opsManagers.rows };
 });
 app.get('/api/imports', async () => {
@@ -283,12 +316,8 @@ async function importWorkbook(buffer, filename) {
   let importedRows = 0, skippedRows = 0, registerRows = 0, cardRows = 0, salaryRows = 0, vesselRows = 0, expenseRows = 0;
   try {
     await client.query('BEGIN');
-    await client.query('DELETE FROM jobs');
-    await client.query('DELETE FROM job_register_entries');
-    await client.query('DELETE FROM job_card_entries');
-    await client.query('DELETE FROM salaries');
-    await client.query('DELETE FROM vessel_entries');
-    await client.query('DELETE FROM expense_entries');
+    // Incremental import: do not delete previous data.
+    // Existing records are updated by job number/import key; new records are added.
 
     for (const row of rows) {
       const jobNumber = pick(row, FIELD_ALIASES.jobNumber);
@@ -309,7 +338,24 @@ async function importWorkbook(buffer, filename) {
       const hasFinancialData = revenue !== 0 || totalCost !== 0 || labourCost !== 0 || equipmentCost !== 0 || workshopCost !== 0;
       const hasRealIdentifier = Boolean(jobNumber || invoiceNumber || jobDate);
       if ((!hasRealIdentifier && !hasFinancialData) || (!jobDate && !hasFinancialData)) { skippedRows += 1; continue; }
-      await client.query(`INSERT INTO jobs (job_number, invoice_number, job_date, division, ops_manager, hours, revenue, labour_cost, equipment_cost, workshop_cost, total_cost, gross_profit, description, client_name, quote_number, po_number) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`, [jobNumber ? String(jobNumber) : null, invoiceNumber ? String(invoiceNumber) : null, jobDate, division ? String(division) : null, opsManager ? String(opsManager) : null, hours, revenue, labourCost, equipmentCost, workshopCost, totalCost, grossProfit, description ? String(description) : null, clientName ? String(clientName) : null, pick(row, FIELD_ALIASES.quoteNumber) || null, pick(row, FIELD_ALIASES.poNumber) || null]);
+      await client.query(`INSERT INTO jobs (job_number, invoice_number, job_date, division, ops_manager, hours, revenue, labour_cost, equipment_cost, workshop_cost, total_cost, gross_profit, description, client_name, quote_number, po_number)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+        ON CONFLICT (job_number) WHERE job_number IS NOT NULL DO UPDATE SET
+          invoice_number=EXCLUDED.invoice_number,
+          job_date=EXCLUDED.job_date,
+          division=EXCLUDED.division,
+          ops_manager=EXCLUDED.ops_manager,
+          hours=EXCLUDED.hours,
+          revenue=EXCLUDED.revenue,
+          labour_cost=EXCLUDED.labour_cost,
+          equipment_cost=EXCLUDED.equipment_cost,
+          workshop_cost=EXCLUDED.workshop_cost,
+          total_cost=EXCLUDED.total_cost,
+          gross_profit=EXCLUDED.gross_profit,
+          description=EXCLUDED.description,
+          client_name=EXCLUDED.client_name,
+          quote_number=EXCLUDED.quote_number,
+          po_number=EXCLUDED.po_number`, [jobNumber ? String(jobNumber) : null, invoiceNumber ? String(invoiceNumber) : null, jobDate, division ? String(division) : null, opsManager ? String(opsManager) : null, hours, revenue, labourCost, equipmentCost, workshopCost, totalCost, grossProfit, description ? String(description) : null, clientName ? String(clientName) : null, pick(row, FIELD_ALIASES.quoteNumber) || null, pick(row, FIELD_ALIASES.poNumber) || null]);
       importedRows += 1;
     }
 
@@ -337,7 +383,23 @@ async function importWorkbook(buffer, filename) {
         const valueExclVat = toNumber(row[13]);
         const paymentsMade = toNumber(row[paymentsColumnIndex]);
         if (!jobNumber && !description && !invoiceNumber) continue;
-        await client.query(`INSERT INTO job_register_entries (job_number, job_date, ops_manager, division, client_name, description, completion_date, quote_number, po_number, report_reference, invoice_number, client_feedback, value_incl_vat, value_excl_vat, payments_made) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`, [jobNumber ? String(jobNumber) : null, jobDate, opsManager ? String(opsManager) : null, division ? String(division) : null, clientName ? String(clientName) : null, description ? String(description) : null, completionDate, quoteNumber ? String(quoteNumber) : null, poNumber ? String(poNumber) : null, issued ? String(issued) : null, invoiceNumber ? String(invoiceNumber) : null, form ? String(form) : null, valueInclVat, valueExclVat, paymentsMade]);
+        await client.query(`INSERT INTO job_register_entries (job_number, job_date, ops_manager, division, client_name, description, completion_date, quote_number, po_number, report_reference, invoice_number, client_feedback, value_incl_vat, value_excl_vat, payments_made)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+          ON CONFLICT (job_number) WHERE job_number IS NOT NULL DO UPDATE SET
+            job_date=EXCLUDED.job_date,
+            ops_manager=EXCLUDED.ops_manager,
+            division=EXCLUDED.division,
+            client_name=EXCLUDED.client_name,
+            description=EXCLUDED.description,
+            completion_date=EXCLUDED.completion_date,
+            quote_number=EXCLUDED.quote_number,
+            po_number=EXCLUDED.po_number,
+            report_reference=EXCLUDED.report_reference,
+            invoice_number=EXCLUDED.invoice_number,
+            client_feedback=EXCLUDED.client_feedback,
+            value_incl_vat=EXCLUDED.value_incl_vat,
+            value_excl_vat=EXCLUDED.value_excl_vat,
+            payments_made=EXCLUDED.payments_made`, [jobNumber ? String(jobNumber) : null, jobDate, opsManager ? String(opsManager) : null, division ? String(division) : null, clientName ? String(clientName) : null, description ? String(description) : null, completionDate, quoteNumber ? String(quoteNumber) : null, poNumber ? String(poNumber) : null, issued ? String(issued) : null, invoiceNumber ? String(invoiceNumber) : null, form ? String(form) : null, valueInclVat, valueExclVat, paymentsMade]);
         registerRows += 1;
       }
     }
@@ -347,7 +409,28 @@ async function importWorkbook(buffer, filename) {
       for (const row of rowsFromSheet(workbook, jcSheet)) {
         const jobNumber = pick(row, FIELD_ALIASES.jobNumber);
         if (!jobNumber) continue;
-        await client.query(`INSERT INTO job_card_entries (job_date, month, year, fy, job_number, ops_manager, description, start_time, end_time, hours, labour_cost, equipment_cost, workshop_cost, division) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`, [toDate(pick(row, FIELD_ALIASES.jobDate)), row.Month || row['Month'] || null, toNumber(row.Year || row['Year']) || null, row.FY ? String(row.FY) : null, String(jobNumber), pick(row, FIELD_ALIASES.opsManager) || null, pick(row, FIELD_ALIASES.description) || null, toTime(row['Start Time '] ?? row['Start Time']), toTime(row['End Time']), toHours(pick(row, FIELD_ALIASES.hours)), toNumber(pick(row, FIELD_ALIASES.labourCost)), toNumber(pick(row, FIELD_ALIASES.equipmentCost)), toNumber(pick(row, FIELD_ALIASES.workshopCost)), cleanDivision(pick(row, FIELD_ALIASES.division))]);
+        const cardDate = toDate(pick(row, FIELD_ALIASES.jobDate));
+        const cardStart = toTime(row['Start Time '] ?? row['Start Time']);
+        const cardEnd = toTime(row['End Time']);
+        const cardDescription = pick(row, FIELD_ALIASES.description) || null;
+        const cardKey = importKey(['job-card', jobNumber, cardDate, cardStart, cardEnd, cardDescription]);
+        await client.query(`INSERT INTO job_card_entries (job_date, month, year, fy, job_number, ops_manager, description, start_time, end_time, hours, labour_cost, equipment_cost, workshop_cost, division, import_key)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+          ON CONFLICT (import_key) WHERE import_key IS NOT NULL DO UPDATE SET
+            job_date=EXCLUDED.job_date,
+            month=EXCLUDED.month,
+            year=EXCLUDED.year,
+            fy=EXCLUDED.fy,
+            job_number=EXCLUDED.job_number,
+            ops_manager=EXCLUDED.ops_manager,
+            description=EXCLUDED.description,
+            start_time=EXCLUDED.start_time,
+            end_time=EXCLUDED.end_time,
+            hours=EXCLUDED.hours,
+            labour_cost=EXCLUDED.labour_cost,
+            equipment_cost=EXCLUDED.equipment_cost,
+            workshop_cost=EXCLUDED.workshop_cost,
+            division=EXCLUDED.division`, [cardDate, row.Month || row['Month'] || null, toNumber(row.Year || row['Year']) || null, row.FY ? String(row.FY) : null, String(jobNumber), pick(row, FIELD_ALIASES.opsManager) || null, cardDescription, cardStart, cardEnd, toHours(pick(row, FIELD_ALIASES.hours)), toNumber(pick(row, FIELD_ALIASES.labourCost)), toNumber(pick(row, FIELD_ALIASES.equipmentCost)), toNumber(pick(row, FIELD_ALIASES.workshopCost)), cleanDivision(pick(row, FIELD_ALIASES.division)), cardKey]);
         cardRows += 1;
       }
     }
@@ -357,7 +440,7 @@ async function importWorkbook(buffer, filename) {
       const vesselData = rowsFromSheet(workbook, vesselSheet);
       for (const row of vesselData) {
         const jobNumber = pick(row, FIELD_ALIASES.jobNumber);
-        const usedVessels = VESSEL_COLUMNS.filter((vessel) => isUsed(row[vessel])).map(normalizeVesselName).filter(Boolean);
+        const usedVessels = VESSEL_COLUMNS.filter((vessel) => isUsed(row[vessel]));
         if (!jobNumber || usedVessels.length === 0) continue;
         const baseHours = toHours(pick(row, FIELD_ALIASES.hours));
         const perVesselHours = usedVessels.length > 1 ? baseHours / usedVessels.length : baseHours;
@@ -365,7 +448,29 @@ async function importWorkbook(buffer, filename) {
         const equipmentCost = toNumber(pick(row, FIELD_ALIASES.equipmentCost));
         const workshopCost = toNumber(pick(row, FIELD_ALIASES.workshopCost));
         for (const vessel of usedVessels) {
-          await client.query(`INSERT INTO vessel_entries (job_date, month, client_name, job_number, ops_manager, description, start_time, end_time, hours, vessel_name, labour_cost, equipment_cost, workshop_cost, division) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`, [toDate(pick(row, FIELD_ALIASES.jobDate)), row.Month || row['Month'] || null, pick(row, FIELD_ALIASES.client) ? String(pick(row, FIELD_ALIASES.client)) : null, String(jobNumber), pick(row, FIELD_ALIASES.opsManager) || null, pick(row, FIELD_ALIASES.description) || null, toTime(row['Start Time '] ?? row['Start Time']), toTime(row['End Time']), perVesselHours, normalizeVesselName(vessel), usedVessels.length > 1 ? labourCost / usedVessels.length : labourCost, usedVessels.length > 1 ? equipmentCost / usedVessels.length : equipmentCost, usedVessels.length > 1 ? workshopCost / usedVessels.length : workshopCost, cleanDivision(pick(row, FIELD_ALIASES.division))]);
+          const vesselDate = toDate(pick(row, FIELD_ALIASES.jobDate));
+          const vesselStart = toTime(row['Start Time '] ?? row['Start Time']);
+          const vesselEnd = toTime(row['End Time']);
+          const vesselDescription = pick(row, FIELD_ALIASES.description) || null;
+          const vesselName = normalizeVesselName(vessel);
+          const vesselKey = importKey(['vessel', jobNumber, vesselDate, vesselStart, vesselEnd, vesselName, vesselDescription]);
+          await client.query(`INSERT INTO vessel_entries (job_date, month, client_name, job_number, ops_manager, description, start_time, end_time, hours, vessel_name, labour_cost, equipment_cost, workshop_cost, division, import_key)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+            ON CONFLICT (import_key) WHERE import_key IS NOT NULL DO UPDATE SET
+              job_date=EXCLUDED.job_date,
+              month=EXCLUDED.month,
+              client_name=EXCLUDED.client_name,
+              job_number=EXCLUDED.job_number,
+              ops_manager=EXCLUDED.ops_manager,
+              description=EXCLUDED.description,
+              start_time=EXCLUDED.start_time,
+              end_time=EXCLUDED.end_time,
+              hours=EXCLUDED.hours,
+              vessel_name=EXCLUDED.vessel_name,
+              labour_cost=EXCLUDED.labour_cost,
+              equipment_cost=EXCLUDED.equipment_cost,
+              workshop_cost=EXCLUDED.workshop_cost,
+              division=EXCLUDED.division`, [vesselDate, row.Month || row['Month'] || null, pick(row, FIELD_ALIASES.client) ? String(pick(row, FIELD_ALIASES.client)) : null, String(jobNumber), pick(row, FIELD_ALIASES.opsManager) || null, vesselDescription, vesselStart, vesselEnd, perVesselHours, vesselName, usedVessels.length > 1 ? labourCost / usedVessels.length : labourCost, usedVessels.length > 1 ? equipmentCost / usedVessels.length : equipmentCost, usedVessels.length > 1 ? workshopCost / usedVessels.length : workshopCost, cleanDivision(pick(row, FIELD_ALIASES.division)), vesselKey]);
           vesselRows += 1;
         }
       }
@@ -376,19 +481,36 @@ async function importWorkbook(buffer, filename) {
     if (expSheet) {
       for (const row of rowsFromSheet(workbook, expSheet)) {
         const amount = toNumber(pick(row, FIELD_ALIASES.expenseAmount));
-        const description = pick(row, FIELD_ALIASES.expenseDescription) || pick(row, FIELD_ALIASES.description);
-        if (!amount && !description) continue;
+        const supplier = coalesceText(pick(row, FIELD_ALIASES.expenseSupplier), row.Company);
+        const category = coalesceText(pick(row, FIELD_ALIASES.expenseCategory), row.Category, 'Unassigned');
+        const placement = coalesceText(row.Placement, cleanDivision(pick(row, FIELD_ALIASES.division)));
+        const description = coalesceText(pick(row, FIELD_ALIASES.expenseDescription), row['Invoice Number'], row['Cash Source'], row['Job Number'], placement, category);
+        if (!amount && !description && !supplier && !category) continue;
+        const expenseDate = toDate(pick(row, FIELD_ALIASES.expenseDate));
+        const vesselName = detectExpenseVessel(row, description);
+        const expenseKey = importKey(['expense', expenseDate, supplier, category, description, amount, row['Job Number'] || '', row['Cash Source'] || '']);
         await client.query(
-          `INSERT INTO expense_entries (expense_date, month, supplier, category, description, division, vessel_name, amount) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+          `INSERT INTO expense_entries (expense_date, month, supplier, category, description, division, vessel_name, amount, import_key)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+           ON CONFLICT (import_key) WHERE import_key IS NOT NULL DO UPDATE SET
+             expense_date=EXCLUDED.expense_date,
+             month=EXCLUDED.month,
+             supplier=EXCLUDED.supplier,
+             category=EXCLUDED.category,
+             description=EXCLUDED.description,
+             division=EXCLUDED.division,
+             vessel_name=EXCLUDED.vessel_name,
+             amount=EXCLUDED.amount`,
           [
-            toDate(pick(row, FIELD_ALIASES.expenseDate)),
+            expenseDate,
             row.Month || row['Month'] || null,
-            pick(row, FIELD_ALIASES.expenseSupplier) ? String(pick(row, FIELD_ALIASES.expenseSupplier)) : null,
-            pick(row, FIELD_ALIASES.expenseCategory) ? String(pick(row, FIELD_ALIASES.expenseCategory)) : 'Unassigned',
-            description ? String(description) : null,
-            cleanDivision(pick(row, FIELD_ALIASES.division)),
-            normalizeVesselName(pick(row, FIELD_ALIASES.vessel)),
+            supplier,
+            category || 'Unassigned',
+            description,
+            cleanDivision(placement),
+            vesselName,
             amount,
+            expenseKey,
           ]
         );
         expenseRows += 1;
@@ -405,7 +527,9 @@ async function importWorkbook(buffer, filename) {
           const month = row[item.col];
           const value = row[item.col + 1];
           if (typeof month === 'string' && month.length > 2 && toNumber(value) > 0) {
-            await client.query(`INSERT INTO salaries (salary_year, salary_month, total_salaries) VALUES ($1,$2,$3)`, [item.year, month, toNumber(value)]);
+            await client.query(`INSERT INTO salaries (salary_year, salary_month, total_salaries)
+              VALUES ($1,$2,$3)
+              ON CONFLICT (salary_year, salary_month) DO UPDATE SET total_salaries=EXCLUDED.total_salaries`, [item.year, month, toNumber(value)]);
             salaryRows += 1;
           }
         }
@@ -450,7 +574,7 @@ async function getSalariesExportRows() {
   return result.rows;
 }
 async function getJobsExportRows() {
-  const result = await pool.query(`SELECT job_number AS "Job Nr", invoice_number AS "Invoice No", job_date AS "Date", division AS "Division", ops_manager AS "OPS Manager", client_name AS "Client", description AS "Description", quote_number AS "Quote Nr", po_number AS "PO No", hours AS "Total Hours", revenue AS "Revenue Excl VAT", labour_cost AS "Labour Costs", equipment_cost AS "Equipment Costs", workshop_cost AS "Workshop Cost", total_cost AS "Total Costs", gross_profit AS "Gross Profit" FROM jobs WHERE COALESCE(division,'') NOT IN ('Dingy','Ingwegwe','DSV Saturn','Flatcat','Ingwena','Pumba','Saturn') ORDER BY job_date DESC NULLS LAST, id DESC`);
+  const result = await pool.query(`SELECT job_number AS "Job Nr", invoice_number AS "Invoice No", job_date AS "Date", division AS "Division", ops_manager AS "OPS Manager", client_name AS "Client", description AS "Description", quote_number AS "Quote Nr", po_number AS "PO No", hours AS "Total Hours", revenue AS "Revenue Excl VAT", labour_cost AS "Labour Costs", equipment_cost AS "Equipment Costs", workshop_cost AS "Workshop Cost", total_cost AS "Total Costs", gross_profit AS "Gross Profit" FROM jobs ORDER BY job_date DESC NULLS LAST, id DESC`);
   return result.rows;
 }
 async function getVesselExportRows() {
@@ -466,7 +590,7 @@ function buildAnalysisRows(jobs) {
   return [{ Metric: 'Jobs', Value: totals.jobs }, { Metric: 'Total Hours', Value: totals.hours }, { Metric: 'Revenue Excl VAT', Value: totals.revenue }, { Metric: 'Labour Costs', Value: totals.labour }, { Metric: 'Equipment Costs', Value: totals.equipment }, { Metric: 'Workshop Cost', Value: totals.workshop }, { Metric: 'Total Costs', Value: totals.cost }, { Metric: 'Gross Profit', Value: totals.profit }, { Metric: 'Gross Profit %', Value: totals.revenue ? totals.profit / totals.revenue : 0 }];
 }
 function buildProfitPerJobRows(jobs) { return jobs.map((job) => { const revenue = Number(job['Revenue Excl VAT'] || 0); const profit = Number(job['Gross Profit'] || 0); return { 'Job Nr': job['Job Nr'], Date: job.Date, Client: job.Client, Division: job.Division, 'OPS Manager': job['OPS Manager'], 'Revenue Excl VAT': revenue, 'Total Costs': Number(job['Total Costs'] || 0), 'Gross Profit': profit, 'GP %': revenue ? profit / revenue : 0 }; }); }
-function buildSettingsRows() { return [{ Setting: 'Company', Value: 'B4 Engineering & Diving / Nautilus Operations' }, { Setting: 'Currency', Value: 'N$' }, { Setting: 'Workbook Export Version', Value: 'Phase 1 + Vessel Info + Expenses' }, { Setting: 'Debtors Logic', Value: 'Monitoring only - current invoices treated as paid by default unless payment data exists' }]; }
+function buildSettingsRows() { return [{ Setting: 'Company', Value: 'B4 Engineering & Diving / Nautilus Operations' }, { Setting: 'Currency', Value: 'N$' }, { Setting: 'Workbook Export Version', Value: 'Phase 1 + Vessel Info' }, { Setting: 'Debtors Logic', Value: 'Monitoring only - current invoices treated as paid by default unless payment data exists' }]; }
 
 app.get('/api/export/job-register.xlsx', async (request, reply) => { try { const workbook = XLSX.utils.book_new(); appendJsonSheet(workbook, 'Job Register', await getJobRegisterExportRows(), [12, 13, 14], [1, 6]); return sendWorkbook(reply, workbook, 'job-register.xlsx'); } catch (error) { app.log.error(error); return reply.code(500).send({ error: error.message }); } });
 app.get('/api/export/job-cards.xlsx', async (request, reply) => { try { const workbook = XLSX.utils.book_new(); appendJsonSheet(workbook, 'Job Card Conversion', await getJobCardsExportRows(), [10, 11, 12], [0]); return sendWorkbook(reply, workbook, 'job-cards.xlsx'); } catch (error) { app.log.error(error); return reply.code(500).send({ error: error.message }); } });
