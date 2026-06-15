@@ -1,1 +1,0 @@
-$(cat /mnt/data/server.fixed.js)
