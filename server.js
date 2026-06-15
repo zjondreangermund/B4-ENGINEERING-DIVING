@@ -397,8 +397,10 @@ function calculateJobCardConversionCost(card) {
   const hours = Math.max(0, toHours(card.hours));
   const crew = listFromText(card.staff_names);
   const equipment = listFromText(card.equipment_used);
-  const crewRateSum = crew.reduce((sum, name) => sum + rateForName(JOB_CARD_CONVERSION_RATES.staffHourly, name), 0);
   const split = splitNormalAndOvertimeHours(card.job_date, card.start_time, card.end_time, hours);
+  const dayType = split.dayType;
+
+  const crewRateSum = crew.reduce((sum, name) => sum + rateForName(JOB_CARD_CONVERSION_RATES.staffHourly, name), 0);
   const dayMultiplier = split.dayType === 'Sat'
     ? JOB_CARD_CONVERSION_RATES.saturdayMultiplier
     : (split.dayType === 'Sun' || split.dayType === 'PH' ? JOB_CARD_CONVERSION_RATES.sundayPublicHolidayMultiplier : 1);
