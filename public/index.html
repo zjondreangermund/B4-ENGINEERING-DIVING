@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/icons/favicon.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="theme-color" content="#061826">
+<title>B-Four Engineering & Diving Data Analysis</title>
+<style>
+:root{--navy:#061826;--cyan:#19b4d8;--green:#16a34a;--orange:#f59e0b;--red:#ef4444;--bg:#f3f7fb;--card:#fff;--text:#102030;--muted:#64748b}*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}.sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:linear-gradient(180deg,var(--navy),#0b2940);color:#fff;padding:24px 18px;overflow:auto}.logo{font-size:24px;font-weight:800}.sub{font-size:12px;opacity:.75;margin:4px 0 28px}.nav a{display:block;color:#d8eff7;text-decoration:none;padding:12px 14px;border-radius:12px;margin:5px 0;cursor:pointer}.nav a.active,.nav a:hover{background:rgba(255,255,255,.12);color:#fff}.main{margin-left:260px;padding:28px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:12px}.h1{font-size:30px;font-weight:800}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}.row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}.card{background:#fff;border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.07);border:1px solid #e6eef5}.label{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.06em}.value{font-size:26px;font-weight:850;margin-top:8px}.good{color:var(--green)}.danger{color:var(--red);font-weight:800}.warn{color:#b45309;font-weight:800}.status{padding:10px 12px;border-radius:12px;background:#eef7ff;color:#07506a;font-weight:700;font-size:13px}.status.ok{background:#dcfce7;color:#166534}.status.error{background:#fee2e2;color:#991b1b}.hidden{display:none!important}.btn{display:inline-block;background:var(--cyan);color:#fff;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;text-decoration:none}.btn.green{background:#0f766e}.btn.orange{background:var(--orange)}.pager{display:flex;align-items:center;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin:12px 0}.pager button{background:#fff;border:1px solid #d7e2ec;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer}.pager button:disabled{opacity:.45;cursor:not-allowed}.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:0 0 16px}.upload{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}.filters input,.filters select,.filters textarea,.upload input{background:#fff;border:1px solid #d7e2ec;border-radius:12px;padding:10px;width:100%;min-width:0}.filters textarea{min-height:78px;resize:vertical}.wide-field{grid-column:1/-1}.table-wrap{overflow:auto;width:100%}table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}th{text-align:left;color:var(--muted);border-bottom:1px solid #e2e8f0;padding:12px;background:#f8fafc;white-space:nowrap}td{padding:12px;border-bottom:1px solid #edf2f7;vertical-align:top}.bar{display:flex;align-items:center;gap:12px;margin:11px 0}.bar span{width:130px;font-size:13px;color:#334155}.track{flex:1;background:#e7eef5;border-radius:999px;height:12px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--cyan),#0f766e);border-radius:999px}.fill.expense{background:linear-gradient(90deg,#fbbf24,var(--orange))}.bar strong{width:130px;text-align:right;font-size:13px}@media(max-width:1000px){.sidebar{position:relative;width:auto}.main{margin-left:0;padding:16px}.grid,.row,.two{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}table{font-size:12px}.h1{font-size:28px}}
+
+.install-banner{position:fixed;right:18px;bottom:18px;z-index:9999;background:#061826;color:#fff;border-radius:18px;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,.25);display:none;max-width:340px;border:1px solid rgba(255,255,255,.18)}
+.install-banner strong{display:block;font-size:16px;margin-bottom:4px}
+.install-banner p{margin:0 0 12px;color:#d8eff7;font-size:13px}
+.install-actions{display:flex;gap:8px;flex-wrap:wrap}
+.install-actions .btn{padding:9px 12px}
+.install-actions .btn.secondary{background:rgba(255,255,255,.14)}
+.role-select{background:#fff;border:1px solid #d7e2ec;border-radius:12px;padding:10px;font-weight:800;color:#102030}.form-field select[multiple]{min-height:125px}.limited-access .profit-only,.limited-access .cost-only{display:none!important}.limited-access #cardsView th:nth-child(14),.limited-access #cardsView th:nth-child(15),.limited-access #cardsView th:nth-child(16),.limited-access #cardsView th:nth-child(17),.limited-access #cardsView th:nth-child(18),.limited-access #cardsView th:nth-child(19),.limited-access #cardRows td:nth-child(14),.limited-access #cardRows td:nth-child(15),.limited-access #cardRows td:nth-child(16),.limited-access #cardRows td:nth-child(17),.limited-access #cardRows td:nth-child(18),.limited-access #cardRows td:nth-child(19){display:none}
+@media(max-width:700px){.install-banner{left:12px;right:12px;bottom:12px;max-width:none}}
+
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:0 0 16px}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-field label{font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.form-field input,.form-field select,.form-field textarea{background:#fff;border:1px solid #d7e2ec;border-radius:12px;padding:10px;width:100%;min-width:0}
+.form-field textarea{min-height:90px;resize:vertical}
+.form-field.full{grid-column:1/-1}
+
+
+
+.login-screen{position:fixed;inset:0;background:linear-gradient(180deg,#061826,#0b2940);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{width:min(420px,100%);background:#fff;border-radius:24px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.login-card h1{margin:0 0 6px;font-size:24px}.login-card p{margin:0 0 18px;color:#64748b}.login-card label{display:block;font-size:12px;font-weight:800;color:#64748b;text-transform:uppercase;margin:12px 0 6px}.login-card input{width:100%;border:1px solid #d7e2ec;border-radius:12px;padding:12px;font-size:16px}.user-badge{background:#eef7ff;color:#07506a;border-radius:12px;padding:10px 12px;font-weight:800;font-size:13px}.logout-btn{background:#fff;color:#061826;border:1px solid #d7e2ec;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}.hidden-auth{display:none!important}
+
+
+.crew-picker{max-height:190px;overflow:auto;border:1px solid #d7e2ec;border-radius:12px;background:#fff;padding:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px}
+.crew-picker label{font-size:13px;display:flex;align-items:center;gap:6px;padding:5px;border-radius:8px;background:#f8fafc}
+.crew-picker input{width:auto!important;min-width:0!important}
+.equipment-picker{max-height:150px;overflow:auto;border:1px solid #d7e2ec;border-radius:12px;background:#fff;padding:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px}
+.equipment-picker label{font-size:13px;display:flex;align-items:center;gap:6px;padding:5px;border-radius:8px;background:#f8fafc}
+.equipment-picker input{width:auto!important;min-width:0!important}
+</style>
+</head>
+<body>
+<div id="installBanner" class="install-banner">
+  <strong>Install B-Four Ops</strong>
+  <p>Add this dashboard to your phone home screen for quick access.</p>
+  <div class="install-actions">
+    <button id="installAppBtn" class="btn green" type="button">Install App</button>
+    <button id="dismissInstallBtn" class="btn secondary" type="button">Not now</button>
+  </div>
+</div>
+
+
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div style="text-align:center;margin-bottom:14px"><img src="/icons/icon-192.png" alt="B-Four" style="width:82px;height:82px;object-fit:contain"></div>
+    <h1>B-Four Ops Login</h1>
+    <p>Use your assigned username and PIN. Finance dashboards are restricted by role.</p>
+    <label>Username</label>
+    <input id="loginUsername" placeholder="e.g. jolanda, bookkeeper, crew" autocomplete="username">
+    <label>PIN</label>
+    <input id="loginPin" type="password" inputmode="numeric" placeholder="PIN" autocomplete="current-password" onkeydown="if(event.key==='Enter')loginUser()">
+    <button class="btn green" style="width:100%;margin-top:16px" onclick="loginUser()">Login</button>
+    <div id="loginMessage" class="status hidden" style="margin-top:12px"></div>
+    <p style="font-size:12px;margin-top:14px">Default setup: Jo-Ann/admin, bookkeeper, OPS managers, supervisor and crew accounts. Supervisors/crew never see costs or profit.</p>
+  </div>
+</div>
+
+<aside class="sidebar"><div style="text-align:center;margin-bottom:18px">
+<img src="/icons/icon-192.png" alt="B-Four logo" style="width:82px;height:82px;object-fit:contain;margin-bottom:8px">
+<div class="logo" style="font-size:17px;line-height:1.2">B-Four Engineering & Diving</div>
+<div class="sub">Data Analysis Platform</div>
+</div><nav class="nav">
+<a class="active" data-view="dashboard">Executive Dashboard</a>
+<a data-view="jobs">Financial Jobs</a>
+<a data-view="clients">Clients</a>
+<a data-view="register">Job Register</a>
+<a data-view="cards">Job Cards</a>
+<a data-view="vessels">Vessel Dashboard</a>
+<a data-view="expenses">Expenses</a>
+<a data-view="salaries">Salaries</a>
+<a data-view="invoice">Invoice Control</a>
+<a data-view="debtors">Debtors & Collections</a>
+<a data-view="quality">Data Quality</a>
+<a data-view="ops">OPS Scorecard</a>
+<a data-view="analytics">Analytics</a>
+<a data-view="imports">Import Excel</a>
+<a data-view="reports">Reports</a>
+<a data-view="settings">Settings</a>
+</nav></aside>
+
+<main class="main">
+
+<div class="top">
+
+  <div style="display:flex;align-items:center;gap:15px">
+
+    <img
+      src="/icons/icon-192.png"
+      alt="B-Four Engineering & Diving"
+      style="width:60px;height:60px;object-fit:contain"
+    >
+
+    <div>
+      <div class="h1" id="pageTitle">Executive Dashboard</div>
+      <div class="muted" id="pageSub">
+        Live profitability view from PostgreSQL and imported Excel job data
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div id="currentUserBadge" class="user-badge">Not logged in</div><button class="logout-btn" onclick="logoutUser()">Logout</button><div id="apiStatus" class="status">Checking database...</div></div>
+
+</div>
+<section id="dashboardView">
+<section class="card">
+<div class="top"><div><h2>Executive Summary Filters</h2><div class="muted">Filter the dashboard totals by year, month, division, OPS manager and client.</div></div><button class="btn" onclick="clearDashboardFilters()">Clear Filters</button></div>
+<div class="filters">
+<select id="dashYear" onchange="renderDashboard()"><option value="">All years</option></select>
+<select id="dashMonth" onchange="renderDashboard()"><option value="">All months</option></select>
+<select id="dashDivision" onchange="renderDashboard()"><option value="">All divisions</option></select>
+<select id="dashOps" onchange="renderDashboard()"><option value="">All OPS managers</option></select>
+<select id="dashClient" onchange="renderDashboard()"><option value="">All clients</option></select>
+<select id="dashDateSort" onchange="renderDashboard()"><option value="desc">Newest date first</option><option value="asc">Oldest date first</option></select>
+</div>
+</section>
+<section class="grid" id="kpis"></section><section class="row"><div class="card"><h2>Profit by Division</h2><div id="profitDiv"></div></div><div class="card"><h2>Total Cost by Division + Expenses & Salaries</h2><div id="costDiv"></div></div><div class="card"><h2>OPS Manager Profit</h2><div id="opsProfit"></div></div></section><section class="card"><h2>Latest Financial Jobs</h2><div class="table-wrap"><table><thead><tr><th>Job</th><th>Date</th><th>Invoice</th><th>Division</th><th>OPS</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th></tr></thead><tbody id="latestJobs"></tbody></table></div></section></section>
+<section id="jobsView" class="hidden"><section class="card"><div class="top"><h2>Financial Jobs</h2><button class="btn" onclick="loadAll()">Refresh</button></div><div class="filters"><input id="jobSearch" placeholder="Search job, invoice, division, OPS" oninput="resetPage('jobs');renderJobs()"><select id="jobDivision" onchange="resetPage('jobs');renderJobs()"><option value="">All divisions</option></select><select id="jobOps" onchange="resetPage('jobs');renderJobs()"><option value="">All OPS managers</option></select><select id="jobsDateSort" onchange="resetPage('jobs');renderJobs()"><option value="desc">Newest date first</option><option value="asc">Oldest date first</option></select></div><div id="jobsPager"></div><div class="table-wrap"><table><thead><tr><th>Job</th><th>Date</th><th>Invoice</th><th>Division</th><th>OPS</th><th>Hours</th><th>Revenue</th><th>Total Cost</th><th>Profit</th></tr></thead><tbody id="jobsRows"></tbody></table></div></section></section>
+<section id="clientsView" class="hidden"><section class="card"><h2>Client Analytics</h2><div class="filters"><input id="clientSearch" placeholder="Search client" oninput="resetPage('clients');renderClients()"><select id="clientSort" onchange="resetPage('clients');renderClients()"><option value="profit">Sort by profit</option><option value="revenue">Sort by revenue</option><option value="jobs">Sort by jobs</option><option value="hours">Sort by hours</option></select></div><div id="clientsPager"></div><div class="table-wrap"><table><thead><tr><th>Client</th><th>Jobs</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>GP %</th></tr></thead><tbody id="clientRows"></tbody></table></div></section></section>
+<section id="registerView" class="hidden"><section class="card"><h2>Job Register</h2><div class="filters"><input id="registerSearch" placeholder="Search job, client, invoice, description" oninput="resetPage('register');renderRegister()"><select id="registerDateSort" onchange="resetPage('register');renderRegister()"><option value="desc">Newest date first</option><option value="asc">Oldest date first</option></select></div><div id="registerPager"></div><div class="table-wrap"><table><thead><tr><th>Job</th><th>Date</th><th>Division Head</th><th>Division</th><th>Client</th><th>Description</th><th>Quote</th><th>PO</th><th>Invoice</th><th>Value Incl VAT</th><th>Value Excl VAT</th></tr></thead><tbody id="registerRows"></tbody></table></div></section></section>
+<section id="cardsView" class="hidden">
+
+<section class="card profit-only" id="pendingReviewPanel">
+  <div class="top">
+    <div>
+      <h2>Pending Job Cards for Review</h2>
+      <div class="muted">Supervisor/crew cards wait here. Add costs and accept before they affect profit.</div>
+    </div>
+    <button class="btn" type="button" onclick="loadAll()">Refresh</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Status</th><th>Job</th><th>Date</th><th>Client</th><th>Vessel</th><th>OPS</th><th>Completed By</th><th>Hours</th><th>Crew</th><th>Work Done</th><th>Costs + Action</th></tr>
+      </thead>
+      <tbody id="pendingReviewRows"><tr><td colspan="11" class="muted">No pending cards loaded.</td></tr></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card"><h2>Capture Job Card</h2><p class="muted">Online version of the hand-written job card. The Job Number links this card to the financial job revenue. Dropdowns reduce spelling mistakes and the card can still be saved offline while offshore.</p>
+<datalist id="manualClientOptions"></datalist><datalist id="manualLocationOptions"></datalist><datalist id="manualStaffOptions"></datalist><datalist id="manualEquipmentOptions"></datalist><datalist id="manualContactOptions"></datalist>
+<div class="form-grid">
+<div class="form-field"><label>Job Number * <small class="muted">(unmatched cards are allowed)</small></label><input id="manualJobNumber" placeholder="Type job number" oninput="autofillManualJobCard()" onblur="autofillManualJobCard()"></div>
+<div class="form-field"><label>Client</label><select id="manualClient"><option value="">Select client</option></select></div>
+<div class="form-field"><label>Contact Person / Vessel Rep</label><input id="manualContact" list="manualContactOptions" placeholder="Contact / representative"></div>
+<div class="form-field"><label>Location</label><select id="manualLocation"><option value="">Select location</option></select></div>
+<div class="form-field"><label>Date</label><input id="manualDate" type="date"></div>
+<div class="form-field"><label>Vessel Used</label><select id="manualVessel"><option value="">Select vessel</option><option>Dingy</option><option>Ingwegwe</option><option>DSV Saturn</option><option>Flatcat</option><option>Ingwena</option><option>Pumba</option><option>Other / None</option></select></div>
+<div class="form-field"><label>OPS Manager</label><select id="manualOps"><option value="">Select OPS Manager</option><option>Jolanda</option><option>Eugen</option><option>Carmon</option><option>Bresler</option><option>Elliotte</option></select></div>
+<div class="form-field"><label>Vertical / Division</label><select id="manualDivision"><option value="">Select vertical</option><option>Diving</option><option>Pollution</option><option>Civils</option><option>WS Maintenance</option></select></div>
+<div class="form-field"><label>Activity / Work Type</label><select id="manualActivity"><option value="">Select activity</option><option>Diving inspection</option><option>Hull cleaning</option><option>Docking</option><option>Undocking</option><option>Vessel shifting</option><option>Salvage / recovery</option><option>Workshop maintenance</option><option>Equipment mobilisation</option><option>Standby</option><option>Other</option></select></div>
+<div class="form-field"><label>Start Time</label><input id="manualStart" type="time" onchange="calculateManualHours()"></div>
+<div class="form-field"><label>End Time</label><input id="manualEnd" type="time" onchange="calculateManualHours()"></div>
+<div class="form-field"><label>Total Hours</label><input id="manualHours" type="number" step="0.01" placeholder="Auto calculated or type hours"></div>
+<div class="form-field full"><label>Staff / Crew</label><div id="manualStaffPicker" class="crew-picker"></div><div class="muted" style="font-size:12px;margin-top:4px">Select all crew members used on this job card.</div></div>
+<div class="form-field full"><label>Equipment Used</label><div id="equipmentPicker" class="equipment-picker"></div><div class="muted" style="font-size:12px;margin-top:4px">Select all equipment items used on this job card.</div></div>
+<div class="form-field full"><label>Work Done / Description</label><textarea id="manualDescription" placeholder="Write what was done, as it appears on the job card"></textarea></div>
+<div class="form-field full cost-only"><label>Cost Conversion (Admin / Bookkeeper / OPS only)</label><div class="muted">Hidden from supervisors and crew. These values feed the Job Card Conversion export and job profit calculations.</div></div><div class="form-field cost-only"><label>Labour Cost</label><input id="manualLabour" type="number" step="0.01" placeholder="0.00"></div>
+<div class="form-field cost-only"><label>Equipment Cost</label><input id="manualEquipment" type="number" step="0.01" placeholder="0.00"></div>
+<div class="form-field cost-only"><label>Workshop Cost</label><input id="manualWorkshop" type="number" step="0.01" placeholder="0.00"></div>
+<div class="form-field cost-only"><label>Material Cost</label><input id="manualMaterial" type="number" step="0.01" placeholder="0.00"></div>
+<div class="form-field cost-only"><label>Other Cost</label><input id="manualOther" type="number" step="0.01" placeholder="0.00"></div>
+<div class="form-field"><label>&nbsp;</label><button class="btn green" onclick="saveManualJobCard()">Save Job Card</button></div>
+<div class="form-field"><label>&nbsp;</label><button class="btn orange" onclick="syncOfflineJobCards()">Sync Offline Cards</button></div>
+<div class="form-field profit-only"><label>&nbsp;</label><button class="btn" onclick="renderSelectedJobLinkSummary()">View Admin Job Profit</button></div>
+</div></div><div id="selectedJobLinkSummary" class="card profit-only" style="margin-top:12px;display:none"></div><div id="manualCardMessage" class="muted"></div><div id="offlineCardStatus" class="muted" style="margin-top:8px">Offline queue: 0 job cards</div><p class="muted" style="margin-top:8px">Works offshore: if there is no internet, job cards are saved on this device and sync when the phone is back online.</p><p class="muted" style="margin-top:8px"><b>Supervisor/Crew mode:</b> costs are hidden. Admin/Bookkeeper/OPS can add the cost conversion later; exports include those costs in the Job Card Conversion sheet.</p></section>
+<section class="card profit-only"><h2>Linked Job Profit</h2><p class="muted">Revenue comes from the Financial Job / Job Register. Costs come from imported Job Card Conversion rows plus manual/offshore job cards linked by Job Number.</p><div class="filters"><input id="jobProfitSearch" placeholder="Search job, client, OPS" oninput="renderJobProfit()"><select id="jobProfitMode" onchange="renderJobProfit()"><option value="all">All linked jobs</option><option value="manual">Manual/offshore cards only</option><option value="loss">Loss-making jobs</option></select></div><div class="table-wrap"><table><thead><tr><th>Job</th><th>Date</th><th>Client</th><th>OPS</th><th>Division</th><th>Revenue</th><th>Imported Card Cost</th><th>Manual Card Cost</th><th>Total Linked Cost</th><th>Profit With Cards</th><th>Margin</th></tr></thead><tbody id="jobProfitRows"></tbody></table></div></section><section class="card profit-only"><h2>Selected Job Card Breakdown</h2><p class="muted">Enter or select a Job Number above to see the cards and cost breakdown linked to that revenue.</p><div id="jobCardBreakdown" class="muted">No job selected.</div></section>
+<section class="card"><div class="top"><div><h2>Job Cards</h2><p class="muted">Online/offshore job cards are linked to Financial Jobs by Job Number in the background. Export creates the Job Card Conversion workbook for the bookkeeper.</p></div><button class="btn green profit-only" onclick="window.location.href='/api/export/job-card-conversion.xlsx'">Export Job Card Conversion XLSX</button></div><div class="filters">
+<input id="cardsSearch" placeholder="Search job, client, location, OPS, description" oninput="resetPage('cards');renderCards()">
+<select id="cardsSource" onchange="resetPage('cards');renderCards()"><option value="">All sources</option><option value="manual">Manual / offshore</option><option value="imported">Imported converter</option></select>
+<select id="cardsOpsFilter" onchange="resetPage('cards');renderCards()"><option value="">All OPS managers</option></select>
+<select id="cardsVesselFilter" onchange="resetPage('cards');renderCards()"><option value="">All vessels</option></select>
+<select id="cardsActivityFilter" onchange="resetPage('cards');renderCards()"><option value="">All activities</option></select>
+<select id="cardsDateSort" onchange="resetPage('cards');renderCards()"><option value="desc">Newest date first</option><option value="asc">Oldest date first</option></select>
+</div><div id="cardsPager"></div><div class="table-wrap"><table><thead><tr><th>Source</th><th>Completed By</th><th>Job</th><th>Date</th><th>Client</th><th>Location</th><th>Vessel</th><th>OPS</th><th>Activity</th><th>Staff</th><th>Equipment</th><th>Description</th><th>Hours</th><th>Labour</th><th>Equipment</th><th>Workshop</th><th>Material</th><th>Other</th><th>Total</th><th>Division</th></tr></thead><tbody id="cardRows"></tbody></table></div></section></section>
+<section id="salariesView" class="hidden"><section class="card"><h2>Salaries</h2><div id="salariesPager"></div><div class="table-wrap"><table><thead><tr><th>Year</th><th>Month</th><th>Total Salaries</th></tr></thead><tbody id="salaryRows"></tbody></table></div></section></section>
+<section id="importsView" class="hidden"><section class="card"><h2>Import Excel Workbook</h2><div class="muted">Upload the B4 Excel file. Upload the B4 master workbook. Imports are cumulative: existing jobs are updated, new weekly/monthly data is added, and previous imports are not removed.</div><div class="upload" style="margin-top:16px"><input id="excelFile" type="file" accept=".xlsx,.xls,.csv"><button class="btn" onclick="uploadExcel()">Upload & Import</button><button class="btn orange" onclick="seedTestData()">Seed Test Data</button></div><div id="importMessage" class="status hidden" style="margin-top:16px"></div></section><section class="card" style="margin-top:18px"><h2>Import History</h2><div class="table-wrap"><table><thead><tr><th>Filename</th><th>Financial Rows</th><th>WS Rows</th><th>Expenses</th><th>Vessels</th><th>Salaries</th><th>Status</th><th>Imported At</th></tr></thead><tbody id="importRows"></tbody></table></div><div id="importsPager"></div></section></section>
+<section id="reportsView" class="hidden"><section class="card"><div class="top"><div><h2>Analysis Report</h2><div class="muted">Filter by year, month, division, OPS manager and client.</div></div><div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn green" onclick="downloadReportCsv()">Export Filtered CSV</button>
+<button class="btn green" onclick="window.location.href='/api/export/job-register.xlsx'">Job Register XLSX</button>
+<button class="btn green" onclick="window.location.href='/api/export/job-card-conversion.xlsx'">Job Card Conversion XLSX</button>
+<button class="btn green" onclick="window.location.href='/api/export/salaries.xlsx'">Salaries XLSX</button>
+<button class="btn green" onclick="window.location.href='/api/export/vessels.xlsx'">Vessels XLSX</button>
+<button class="btn green" onclick="window.location.href='/api/export/expenses.xlsx'">Expenses XLSX</button>
+<button class="btn orange" onclick="window.location.href='/api/export/full-workbook.xlsx'">Full Workbook XLSX</button>
+</div></div><div class="filters"><select id="reportYear" onchange="renderReports()"><option value="">All years</option></select><select id="reportMonth" onchange="renderReports()"><option value="">All months</option></select><select id="reportDivision" onchange="renderReports()"><option value="">All divisions</option></select><select id="reportOps" onchange="renderReports()"><option value="">All OPS managers</option></select><select id="reportClient" onchange="renderReports()"><option value="">All clients</option></select></div><section class="grid" id="reportKpis"></section></section><section class="two"><div class="card"><h2>Hours by Month</h2><div id="reportHoursMonth"></div></div><div class="card"><h2>Revenue by Month</h2><div id="reportRevenueMonth"></div></div></section><section class="two"><div class="card"><h2>Profit by Division</h2><div id="reportProfitDivision"></div></div><div class="card"><h2>Cost by Division</h2><div id="reportCostDivision"></div></div></section><section class="two"><div class="card"><h2>OPS Manager Summary</h2><div class="table-wrap"><table><thead><tr><th>OPS</th><th>Jobs</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th></tr></thead><tbody id="reportOpsRows"></tbody></table></div></div><div class="card"><h2>Monthly Summary</h2><div class="table-wrap"><table><thead><tr><th>Month</th><th>Jobs</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th></tr></thead><tbody id="reportMonthRows"></tbody></table></div></div></section></section>
+<section id="invoiceView" class="hidden"><section class="card"><h2>Invoice Control Centre</h2><p class="muted">Find missing invoices, unbilled work and data quality issues after each Excel import.</p><section class="grid" id="invoiceKpis"></section><div class="filters"><input id="invoiceSearch" placeholder="Search invoice, job, client, OPS" oninput="resetPage('invoice');renderInvoice()"><select id="invoiceStatus" onchange="resetPage('invoice');renderInvoice()"><option value="">All statuses</option><option value="Invoiced">Invoiced</option><option value="Missing invoice">Missing invoice</option><option value="Revenue but no invoice">Revenue but no invoice</option><option value="Invoice but zero revenue">Invoice but zero revenue</option></select><select id="invoiceOps" onchange="resetPage('invoice');renderInvoice()"><option value="">All OPS managers</option></select><select id="invoiceDivision" onchange="resetPage('invoice');renderInvoice()"><option value="">All divisions</option></select><select id="invoiceDateSort" onchange="resetPage('invoice');renderInvoice()"><option value="desc">Newest date first</option><option value="asc">Oldest date first</option></select></div><div id="invoicePager"></div><div class="table-wrap"><table><thead><tr><th>Status</th><th>OPS Manager</th><th>Job</th><th>Date</th><th>Client</th><th>Division</th><th>Invoice</th><th>Register Excl VAT</th><th>Financial Revenue</th><th>Difference</th></tr></thead><tbody id="invoiceRows"></tbody></table></div></section></section>
+<section id="debtorsView" class="hidden"><section class="card"><div class="top"><div><h2>Debtors & Collections</h2><p class="muted">No payments column was found in the Job Register, so imported invoice values are treated as paid unless a future payments column is added.</p></div><button class="btn green" onclick="downloadDebtorsCsv()">Export CSV</button></div><section class="grid" id="debtorsKpis"></section><div class="filters"><input id="debtorsSearch" placeholder="Search invoice, job, client, OPS" oninput="debtorsPage=1;renderDebtors()"><select id="debtorsClient" onchange="debtorsPage=1;renderDebtors()"><option value="">All clients</option></select><select id="debtorsOps" onchange="debtorsPage=1;renderDebtors()"><option value="">All OPS managers</option></select><select id="debtorsDivision" onchange="debtorsPage=1;renderDebtors()"><option value="">All divisions</option></select><select id="debtorsStatus" onchange="debtorsPage=1;renderDebtors()"><option value="">All statuses</option><option value="Paid">Paid</option><option value="Partial">Partial</option><option value="Outstanding">Outstanding</option></select><select id="debtorsAging" onchange="debtorsPage=1;renderDebtors()"><option value="">All aging buckets</option><option value="0-30">0-30 days</option><option value="31-60">31-60 days</option><option value="61-90">61-90 days</option><option value="91-120">91-120 days</option><option value="120+">120+ days</option></select></div><div class="pager"><button id="debtorsPrev" onclick="debtorsPage=Math.max(1,debtorsPage-1);renderDebtors()">Previous</button><span id="debtorsPageInfo" class="muted"></span><button id="debtorsNext" onclick="debtorsPage+=1;renderDebtors()">Next</button><select id="debtorsPageSize" onchange="debtorsPage=1;renderDebtors()"><option value="25" selected>25 rows</option><option value="50">50 rows</option><option value="100">100 rows</option><option value="250">250 rows</option></select></div><div class="table-wrap"><table><thead><tr><th>Invoice</th><th>Job</th><th>Date</th><th>Client</th><th>OPS Manager</th><th>Division</th><th>Invoice Value</th><th>Paid</th><th>Outstanding</th><th>Age</th><th>Bucket</th><th>Status</th></tr></thead><tbody id="debtorsRows"></tbody></table></div></section></section>
+<section id="qualityView" class="hidden"><section class="card"><div class="top"><div><h2>Data Quality Centre</h2><p class="muted">Import checks for missing invoices, missing clients, missing OPS managers, zero revenue with cost and loss-making jobs.</p></div><button class="btn green" onclick="downloadQualityCsv()">Export CSV</button></div><section class="grid" id="qualityKpis"></section><div class="filters"><input id="qualitySearch" placeholder="Search issue, job, invoice, client, OPS" oninput="resetPage('quality');renderQuality()"><select id="qualitySeverity" onchange="resetPage('quality');renderQuality()"><option value="">All severities</option><option value="Critical">Critical</option><option value="Warning">Warning</option></select><select id="qualityType" onchange="resetPage('quality');renderQuality()"><option value="">All issue types</option></select><select id="qualityOps" onchange="resetPage('quality');renderQuality()"><option value="">All OPS managers</option></select><select id="qualityDivision" onchange="resetPage('quality');renderQuality()"><option value="">All divisions</option></select><select id="qualityDateSort" onchange="resetPage('quality');renderQuality()"><option value="desc">Newest date first</option><option value="asc">Oldest date first</option></select></div><div id="qualityPager"></div><div class="table-wrap"><table><thead><tr><th>Severity</th><th>Issue Type</th><th>Job</th><th>Invoice</th><th>Date</th><th>Client</th><th>OPS</th><th>Division</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Note</th></tr></thead><tbody id="qualityRows"></tbody></table></div></section></section>
+<section id="opsView" class="hidden"><section class="card"><div class="top"><div><h2>OPS Manager Scorecard</h2><p class="muted">Revenue, profit, hours, invoice coverage and issue ownership by OPS manager.</p></div><button class="btn green" onclick="downloadOpsCsv()">Export CSV</button></div><section class="grid" id="opsKpis"></section><div class="filters"><input id="opsSearch" placeholder="Search OPS manager" oninput="resetPage('ops');renderOps()"><select id="opsSort" onchange="resetPage('ops');renderOps()"><option value="profit">Sort by profit</option><option value="revenue">Sort by revenue</option><option value="jobs">Sort by jobs</option><option value="gp">Sort by GP %</option><option value="missingInvoices">Sort by missing invoices</option><option value="lossJobs">Sort by loss jobs</option></select><select id="opsMinJobs" onchange="resetPage('ops');renderOps()"><option value="0">All job counts</option><option value="5">Minimum 5 jobs</option><option value="10">Minimum 10 jobs</option><option value="25">Minimum 25 jobs</option></select></div><div id="opsPager"></div><div class="table-wrap"><table><thead><tr><th>OPS Manager</th><th>Jobs</th><th>Revenue</th><th>Total Cost</th><th>Profit</th><th>GP %</th><th>Hours</th><th>Revenue / Hour</th><th>Missing Invoices</th><th>Loss Jobs</th></tr></thead><tbody id="opsRows"></tbody></table></div></section></section>
+<section id="analyticsView" class="hidden"><section class="card"><div class="top"><div><h2>Analytics</h2><p class="muted">Filtered performance analytics across months, divisions, OPS managers and clients.</p></div><button class="btn green" onclick="downloadAnalyticsCsv()">Export CSV</button></div><div class="filters"><input id="analyticsSearch" placeholder="Search job, invoice, client, OPS, division" oninput="renderAnalytics()"><select id="analyticsYear" onchange="renderAnalytics()"><option value="">All years</option></select><select id="analyticsMonth" onchange="renderAnalytics()"><option value="">All months</option></select><select id="analyticsDivision" onchange="renderAnalytics()"><option value="">All divisions</option></select><select id="analyticsOps" onchange="renderAnalytics()"><option value="">All OPS managers</option></select><select id="analyticsClient" onchange="renderAnalytics()"><option value="">All clients</option></select><select id="analyticsSort" onchange="renderAnalytics()"><option value="profit">Sort by profit</option><option value="revenue">Sort by revenue</option><option value="jobs">Sort by jobs</option><option value="gp">Sort by GP %</option><option value="hours">Sort by hours</option><option value="dateDesc">Newest date first</option><option value="dateAsc">Oldest date first</option></select><select id="analyticsPageSize" onchange="renderAnalytics()"><option value="25" selected>25 rows</option><option value="50">50 rows</option><option value="100">100 rows</option><option value="250">250 rows</option></select></div><section class="grid" id="analyticsKpis"></section></section><section class="two"><div class="card"><h2>Monthly Performance</h2><div class="table-wrap"><table><thead><tr><th>Month</th><th>Jobs</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>GP %</th></tr></thead><tbody id="analyticsMonthRows"></tbody></table></div></div><div class="card"><h2>Division Performance</h2><div class="table-wrap"><table><thead><tr><th>Division</th><th>Jobs</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>GP %</th></tr></thead><tbody id="analyticsDivisionRows"></tbody></table></div></div></section><section class="two"><div class="card"><h2>OPS Performance</h2><div class="table-wrap"><table><thead><tr><th>OPS Manager</th><th>Jobs</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>GP %</th></tr></thead><tbody id="analyticsOpsRows"></tbody></table></div></div><div class="card"><h2>Client Performance</h2><div class="table-wrap"><table><thead><tr><th>Client</th><th>Jobs</th><th>Hours</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>GP %</th></tr></thead><tbody id="analyticsClientRows"></tbody></table></div></div></section></section>
+<section id="vesselsView" class="hidden">
+<section class="card">
+<div class="top">
+<div>
+<h2>Vessel Dashboard</h2>
+<p class="muted">Separate vessel utilisation, revenue, costs and job activity from the operational workbook. A value of 1 in the workbook means the vessel was used on that job.</p>
+</div>
+<button class="btn green" onclick="window.location.href='/api/export/vessels.xlsx'">Export Vessels XLSX</button>
+</div>
+
+<section class="grid" id="vesselKpis"></section>
+
+<div class="filters">
+<input id="vesselSearch" placeholder="Search vessel, job, client, OPS, description" oninput="resetPage('vessels');renderVessels()">
+<select id="vesselFilter" onchange="resetPage('vessels');renderVessels()"><option value="">All vessels</option></select>
+<select id="vesselClient" onchange="resetPage('vessels');renderVessels()"><option value="">All clients</option></select>
+<select id="vesselOpsFilter" onchange="resetPage('vessels');renderVessels()"><option value="">All OPS managers</option></select>
+<select id="vesselDivision" onchange="resetPage('vessels');renderVessels()"><option value="">All divisions</option></select>
+<select id="vesselYear" onchange="resetPage('vessels');renderVessels()"><option value="">All years</option></select>
+<select id="vesselMonthFilter" onchange="resetPage('vessels');renderVessels()"><option value="">All months</option></select>
+<select id="vesselProfitStatus" onchange="resetPage('vessels');renderVessels()"><option value="">All profit statuses</option><option value="profit">Profitable</option><option value="loss">Loss-making</option></select>
+<select id="vesselDateSort" onchange="resetPage('vessels');renderVessels()"><option value="desc">Newest date first</option><option value="asc">Oldest date first</option></select>
+</div>
+
+</section>
+
+<section class="row">
+<div class="card"><h2>Revenue by Vessel</h2><div id="vesselRevenue"></div></div>
+<div class="card"><h2>Profit by Vessel</h2><div id="vesselProfit"></div></div>
+<div class="card"><h2>Hours by Vessel</h2><div id="vesselHours"></div></div>
+</section>
+
+<section class="two">
+<div class="card"><h2>Vessel Activity by Month</h2><div id="vesselMonthChart"></div></div>
+<div class="card"><h2>OPS Vessel Usage</h2><div id="vesselOpsChart"></div></div>
+</section>
+
+<section class="card">
+<h2>Vessel Job Register</h2>
+<div id="vesselsPager"></div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Date</th><th>Vessel</th><th>Job</th><th>Client</th><th>OPS</th><th>Description</th><th>Hours</th><th>Revenue</th><th>Total Cost</th><th>Profit</th><th>Division</th>
+</tr>
+</thead>
+<tbody id="vesselRows"></tbody>
+</table>
+</div>
+</section>
+</section>
+
+
+<section id="expensesView" class="hidden">
+<section class="card">
+<div class="top"><div><h2>Expenses</h2><p class="muted">Expense import and monitoring from the workbook Expenses NO JOB # column to avoid double-counting job-linked expenses.</p></div><button class="btn green" onclick="window.location.href='/api/export/expenses.xlsx'">Export Expenses XLSX</button></div>
+<section class="grid" id="expenseKpis"></section>
+<div class="filters">
+<input id="expenseSearch" placeholder="Search supplier, category, vessel, division, description" oninput="resetPage('expenses');renderExpenses()">
+<select id="expenseCategory" onchange="resetPage('expenses');renderExpenses()"><option value="">All categories</option></select>
+<select id="expenseSupplier" onchange="resetPage('expenses');renderExpenses()"><option value="">All suppliers</option></select>
+<select id="expenseVessel" onchange="resetPage('expenses');renderExpenses()"><option value="">All vessels</option></select>
+<select id="expenseDivision" onchange="resetPage('expenses');renderExpenses()"><option value="">All divisions</option></select>
+<select id="expenseYear" onchange="resetPage('expenses');renderExpenses()"><option value="">All years</option></select>
+<select id="expenseMonth" onchange="resetPage('expenses');renderExpenses()"><option value="">All months</option></select>
+<select id="expenseDateSort" onchange="resetPage('expenses');renderExpenses()"><option value="desc">Newest date first</option><option value="asc">Oldest date first</option></select>
+</div>
+</section>
+<section class="row">
+<div class="card"><h2>Expenses by Category</h2><div id="expenseCategoryBars"></div></div>
+<div class="card"><h2>Expenses by Vessel</h2><div id="expenseVesselBars"></div></div>
+<div class="card"><h2>Expenses by Month</h2><div id="expenseMonthBars"></div></div>
+</section>
+<section class="card"><h2>Expense Register</h2><div id="expensesPager"></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Supplier</th><th>Category</th><th>Description</th><th>Vessel</th><th>Division</th><th>Excl VAT</th><th>Incl VAT</th><th>Amount</th></tr></thead><tbody id="expenseRows"></tbody></table></div></section>
+</section>
+
+<section id="settingsView" class="hidden"><section class="card"><h2>Settings</h2><p class="muted">Company profile, users, roles, divisions and VAT settings.</p></section></section>
+</main>
+<script>
+let dashboardData=null,jobs=[],registers=[],cards=[],pendingCards=[],jobProfit=[],salaries=[],imports=[],vessels=[],expenses=[],vesselDashboard=null,debtorsPage=1,tablePages={jobs:1,clients:1,register:1,cards:1,salaries:1,imports:1,invoice:1,quality:1,ops:1,vessels:1,expenses:1};
+const money=n=>'N$ '+Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});const num=n=>Number(n||0).toLocaleString();const pct=n=>((Number(n||0)*100).toFixed(2)+'%');const esc=v=>String(v??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));const date=v=>v?String(v).slice(0,10):'';const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const ADMIN_VIEWS=['dashboard','jobs','clients','register','salaries','invoice','debtors','quality','ops','analytics','imports','reports','settings','vessels','expenses'];
+let currentUser=null;
+function roleKey(){const r=String(currentUser?.role||'').toUpperCase();if(['ADMIN','BOOKKEEPER'].includes(r))return 'admin';if(r==='OPS_MANAGER')return 'ops';return 'staff'}
+function currentAccessRole(){return roleKey()}
+function canSeeAdmin(){return ['admin','ops'].includes(currentAccessRole())}
+async function api(path,opts={}){
+ const headers=opts.headers?{...opts.headers}:{};
+ const token=localStorage.getItem('b4AuthToken');
+ if(token)headers.Authorization='Bearer '+token;
+ let r;
+ try{
+  r=await fetch(path,{...opts,headers});
+ }catch(e){
+  const err=new Error('Network connection failed. Your card can be saved offline and synced later.');
+  err.isNetworkError=true;
+  throw err;
+ }
+ const text=await r.text();
+ let data={};
+ try{data=text?JSON.parse(text):{};}catch(e){data={raw:text};}
+ if(!r.ok){
+  const err=new Error(data.error||data.message||path+' failed: '+r.status);
+  err.status=r.status;
+  err.data=data;
+  err.retryable=[408,429,502,503,504].includes(r.status);
+  throw err;
+ }
+ return data;
+}
+function shouldQueueOfflineError(e){return !navigator.onLine || e?.isNetworkError || e?.retryable===true}
+async function checkStatus(){
+ const el=document.getElementById('apiStatus');
+ if(!el)return;
+ if(currentAccessRole()==='staff'){el.textContent=navigator.onLine?'Online':'Offline mode';el.className=navigator.onLine?'status ok':'status error';return;}
+ try{const s=await api('/api/status');el.textContent=s.database==='connected'?'Database connected':'Database not connected';el.className=s.database==='connected'?'status ok':'status error'}catch(e){el.textContent='API offline';el.className='status error'}
+}
+
+function showLogin(message=''){document.getElementById('loginScreen')?.classList.remove('hidden-auth');document.querySelector('.sidebar')?.classList.add('hidden-auth');document.querySelector('.main')?.classList.add('hidden-auth');if(message){const el=document.getElementById('loginMessage');if(el){el.textContent=message;el.className='status error'}}}
+function hideLogin(){document.getElementById('loginScreen')?.classList.add('hidden-auth');document.querySelector('.sidebar')?.classList.remove('hidden-auth');document.querySelector('.main')?.classList.remove('hidden-auth')}
+async function loginUser(){const msg=document.getElementById('loginMessage');try{if(msg){msg.textContent='Logging in...';msg.className='status'}const username=document.getElementById('loginUsername').value;const pin=document.getElementById('loginPin').value;const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,pin})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'Login failed');localStorage.setItem('b4AuthToken',data.token);currentUser=data.user;hideLogin();await loadAll()}catch(e){if(msg){msg.textContent=e.message;msg.className='status error'}}}
+async function logoutUser(){try{await api('/api/auth/logout',{method:'POST'})}catch(e){}localStorage.removeItem('b4AuthToken');currentUser=null;showLogin('Logged out.')}
+async function initAuth(){const token=localStorage.getItem('b4AuthToken');if(!token){showLogin();return}try{const r=await api('/api/auth/me');if(!r.user){localStorage.removeItem('b4AuthToken');showLogin();return}currentUser=r.user;hideLogin();await loadAll()}catch(e){localStorage.removeItem('b4AuthToken');showLogin(e.message)}}
+function applyAccessControl(){const role=currentAccessRole();document.body.classList.toggle('limited-access',role==='staff');const badge=document.getElementById('currentUserBadge');if(badge&&currentUser)badge.textContent=`${currentUser.name} • ${currentUser.role.replace('_',' ')}`;const apiEl=document.getElementById('apiStatus');if(apiEl&&role==='staff'&&apiEl.textContent==='Checking database...'){apiEl.textContent=navigator.onLine?'Online':'Offline mode';apiEl.className=navigator.onLine?'status ok':'status error'}document.querySelectorAll('.nav a[data-view]').forEach(a=>{const view=a.dataset.view;const staffAllowed=['cards'].includes(view);const hide=(role==='staff' && !staffAllowed) || (role==='ops' && ['salaries','imports','settings'].includes(view));a.style.display=hide?'none':''});document.querySelectorAll('.profit-only').forEach(el=>{el.style.display=canSeeAdmin()?'':'none'});document.querySelectorAll('.cost-only').forEach(el=>{el.style.display=canSeeAdmin()?'':'none'});} 
+function showView(view){if(currentAccessRole()==='staff' && view!=='cards')view='cards';applyAccessControl();document.querySelectorAll('main>section').forEach(s=>s.classList.add('hidden'));document.getElementById(view+'View')?.classList.remove('hidden');document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));document.querySelector(`.nav a[data-view="${view}"]`)?.classList.add('active');document.getElementById('pageTitle').textContent=document.querySelector(`.nav a[data-view="${view}"]`)?.textContent||'B-Four Ops';location.hash=view==='dashboard'?'':view;if(view==='reports')renderReports();if(view==='invoice')renderInvoice();if(view==='debtors')renderDebtors();if(view==='quality')renderQuality();if(view==='ops')renderOps();if(view==='analytics')renderAnalytics();if(view==='vessels')renderVessels();if(view==='expenses')renderExpenses()}
+document.querySelectorAll('.nav a[data-view]').forEach(a=>a.onclick=()=>showView(a.dataset.view));
+function isCoreDivisionName(v){return ['Pollution','Diving','Civils','WS Maintenance'].includes(v)}
+function group(rows,key,val){const m={};rows.forEach(r=>{const k=r[key]||'Unassigned';m[k]=(m[k]||0)+Number(r[val]||0)});return Object.entries(m).map(([name,total])=>({name,total})).sort((a,b)=>b.total-a.total)}
+function groupCoreDivisions(rows,val){const m={};rows.forEach(r=>{const k=r.division||'';if(!isCoreDivisionName(k))return;m[k]=(m[k]||0)+Number(r[val]||0)});return Object.entries(m).map(([name,total])=>({name,total})).sort((a,b)=>b.total-a.total)}
+const VALID_OPS_MANAGERS=['Jolanda','Eugen','Carmon','Bresler','Elliotte'];
+const STAFF_CREW_LIST=["A B de Beer", "W Van Wyk", "J Titus", "B Moses", "E Matamu", "K Luhl", "H Hamupunda", "L Rhode", "F De Barros", "E Green", "D De Waal", "D Lackey", "L Naweseb", "D Nickel", "J Kennedy", "L Visagie", "M Benz", "M Job", "J Shaanyenge", "I Armandu", "S Titus", "M S Siluka", "J M Muyenga", "M Matheus", "R Coetzee", "B E Masuku", "E Uarije", "A Thiele", "E Croza", "J Loock", "C September", "F Kavera", "L Dias", "P Swartz", "J Rootman", "A Morkel", "M C Nel", "T Joel", "H Matias", "A Ndanyengwa", "W Samuel", "R Hendricks", "I Shifela", "A Fredericks", "I Amulungu", "B Bester", "S Ntinda", "E Wildschudt", "A Hammond", "R Lensley", "N Botha", "P Sikongo", "T Mouton", "P Shekudja", "W Shilunga", "V Sakkeus", "T Haulyowike", "J Olivier", "R Simushi", "E Fourie", "T De Beer", "S Ugulu", "L Haikali", "C Shimbilinga", "F Shindongo", "E Haikela", "A Katambo", "H Goseb", "E C Mouton", "Z Van Wyk", "T van Wyk", "Y Hekulanu", "J Steyn", "G Hoeses", "D Wallis", "I Swartz", "S Jerobeam"];
+const EQUIPMENT_LIST=["Dingy", "Ingwegwe", "DSV Saturn", "Flatcat", "Ingwena", "Diving Compressor", "Hookha spread", "Hawk hydro Blaster", "Hydro Blaster Karcher", "Submersible Pump 220v", "3''Petrol Driven Trash Pump", "Compressor for inflating Buoyancy Bags", "Hand Tools", "Air Spread 1,2,3,4", "Air Spread 5", "Pumba", "Wap Machine", "Buoyancy Bags", "Site Vehicle", "Petrol", "Diesel"];
+function groupValidOps(rows,val){const m={};rows.forEach(r=>{const k=String(r.ops_manager||'').trim();if(!VALID_OPS_MANAGERS.includes(k))return;m[k]=(m[k]||0)+Number(r[val]||0)});return Object.entries(m).map(([name,total])=>({name,total})).sort((a,b)=>b.total-a.total)}
+function bars(id,rows,type='profit'){const max=Math.max(...rows.map(r=>Math.abs(r.total)),1);document.getElementById(id).innerHTML=rows.map(r=>`<div class="bar"><span>${esc(r.name)}</span><div class="track"><div class="fill ${type==='expense'?'expense':''}" style="width:${Math.max(3,Math.abs(r.total)/max*100)}%"></div></div><strong class="${type==='expense'?'warn':r.total<0?'danger':'good'}">${type==='count'?Number(r.total).toFixed(1):money(r.total)}</strong></div>`).join('')||'<div class="muted">No data.</div>'}
+function jobRow(j){return `<tr><td>${esc(j.job_number)}</td><td>${date(j.job_date)}</td><td>${esc(j.invoice_number)}</td><td>${esc(j.division)}</td><td>${esc(j.ops_manager)}</td><td>${Number(j.hours||0).toFixed(1)}</td><td>${money(j.revenue)}</td><td>${money(j.total_cost)}</td><td class="${Number(j.gross_profit||0)<0?'danger':'good'}">${money(j.gross_profit)}</td></tr>`}
+function dashboardFilteredJobs(){
+const y=document.getElementById('dashYear')?.value||'',m=document.getElementById('dashMonth')?.value||'',d=document.getElementById('dashDivision')?.value||'',o=document.getElementById('dashOps')?.value||'',c=document.getElementById('dashClient')?.value||'';
+return enrichedJobs().filter(j=>{const dt=date(j.job_date);return(!y||dt.slice(0,4)===y)&&(!m||dt.slice(5,7)===m)&&(!d||j.division===d)&&(!o||j.ops_manager===o)&&(!c||j.client_name===c)})
+}
+function dashboardFilteredExpenses(){
+const y=document.getElementById('dashYear')?.value||'',m=document.getElementById('dashMonth')?.value||'',d=document.getElementById('dashDivision')?.value||'';
+return expenses.filter(e=>{const dt=date(e.expense_date||e.job_date);return(!y||dt.slice(0,4)===y)&&(!m||dt.slice(5,7)===m)&&(!d||e.division===d)})
+}
+function dashboardFilteredSalaries(){
+const y=document.getElementById('dashYear')?.value||'',m=document.getElementById('dashMonth')?.value||'';
+return salaries.filter(s=>{const sy=String(s.salary_year||'');const sm=String(s.salary_month||'').trim();const monthIdx=monthNames.findIndex(x=>x.toLowerCase().startsWith(sm.toLowerCase().slice(0,3)))+1;return(!y||sy===y)&&(!m||String(monthIdx).padStart(2,'0')===m)})
+}
+function setDashboardFilterOptions(){
+const rows=enrichedJobs();
+setOptions('dashYear','All years',[...new Set(rows.map(j=>date(j.job_date).slice(0,4)).filter(Boolean))].sort().reverse());
+const monthEl=document.getElementById('dashMonth');if(monthEl)monthEl.innerHTML='<option value="">All months</option>'+monthNames.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('');
+setOptions('dashDivision','All divisions',[...new Set(rows.map(j=>j.division).filter(Boolean))].sort());
+setOptions('dashOps','All OPS managers',[...new Set(rows.map(j=>j.ops_manager).filter(v=>VALID_OPS_MANAGERS.includes(String(v||'').trim())) )].sort());
+setOptions('dashClient','All clients',[...new Set(rows.map(j=>j.client_name).filter(Boolean))].sort())
+}
+function clearDashboardFilters(){['dashYear','dashMonth','dashDivision','dashOps','dashClient','dashDateSort'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=id==='dashDateSort'?'desc':''});renderDashboard()}
+function executiveCostByDivision(jobRows,expenseRows,salaryRows){
+const m={};
+jobRows.forEach(j=>{const k=j.division||'';if(!isCoreDivisionName(k))return;m[k]=(m[k]||0)+Number(j.total_cost||0)});
+expenseRows.forEach(e=>{const k=e.division||'Expenses / Overheads';m[k]=(m[k]||0)+Number(e.amount||0)});
+const salaryTotal=salaryRows.reduce((s,r)=>s+Number(r.total_salaries||0),0);
+if(salaryTotal)m['Salaries / Overheads']=(m['Salaries / Overheads']||0)+salaryTotal;
+return Object.entries(m).map(([name,total])=>({name,total})).sort((a,b)=>b.total-a.total)
+}
+
+function sortByDate(rows,key='job_date',direction='desc'){
+  const dir=direction==='asc'?1:-1;
+  return [...(rows||[])].sort((a,b)=>{
+    const av=a?.[key], bv=b?.[key];
+    const at=av?new Date(av).getTime():0, bt=bv?new Date(bv).getTime():0;
+    return (at-bt)*dir;
+  });
+}
+function pageSize(){return 25}
+function pageSlice(name,rows){
+  const size=Number(document.getElementById(name+'PageSize')?.value||25);
+  const pages=Math.max(1,Math.ceil((rows||[]).length/size));
+  tablePages[name]=Math.min(Math.max(1,Number(tablePages[name]||1)),pages);
+  return (rows||[]).slice((tablePages[name]-1)*size,tablePages[name]*size);
+}
+function makePager(name,renderFn){
+  const rowsCount={jobs:jobs.length,clients:jobs.length,register:registers.length,cards:cards.length,salaries:salaries.length,imports:imports.length,invoice:registers.length,quality:jobs.length,ops:jobs.length,vessels:vessels.length,expenses:expenses.length}[name]||0;
+  const size=25,pages=Math.max(1,Math.ceil(rowsCount/size)),page=Math.min(Math.max(1,Number(tablePages[name]||1)),pages);
+  tablePages[name]=page;
+  return `<div class="pager"><button ${page<=1?'disabled':''} onclick="tablePages.${name}--;${renderFn}()">Previous</button><span>Page ${page} of ${pages}</span><button ${page>=pages?'disabled':''} onclick="tablePages.${name}++;${renderFn}()">Next</button></div>`;
+}
+
+function renderDashboard(){
+const rows=dashboardFilteredJobs();
+const expenseRows=dashboardFilteredExpenses();
+const salaryRows=dashboardFilteredSalaries();
+const revenue=rows.reduce((s,j)=>s+Number(j.revenue||0),0);
+const jobCost=rows.reduce((s,j)=>s+Number(j.total_cost||0),0);
+const labour=rows.reduce((s,j)=>s+Number(j.labour_cost||0),0);
+const equipment=rows.reduce((s,j)=>s+Number(j.equipment_cost||0),0);
+const workshop=rows.reduce((s,j)=>s+Number(j.workshop_cost||0),0);
+const grossProfit=revenue-jobCost;
+const expenseTotal=expenseRows.reduce((s,e)=>s+Number(e.amount||0),0);
+const salaryTotal=salaryRows.reduce((s,r)=>s+Number(r.total_salaries||0),0);
+const pendingManualCards=(cards||[]).filter(c=>String(c.source||'').toLowerCase().includes('manual')&&String(c.review_status||'pending')!=='accepted').length;const acceptedManualCardCost=(cards||[]).filter(c=>String(c.source||'').toLowerCase().includes('manual')&&String(c.review_status||'pending')==='accepted').reduce((s,c)=>s+(Number(c.total_cost||0)||Number(c.labour_cost||0)+Number(c.equipment_cost||0)+Number(c.workshop_cost||0)+Number(c.material_cost||0)+Number(c.other_cost||0)),0);
+const fullCost=jobCost+expenseTotal+salaryTotal;
+const grossGp=revenue?grossProfit/revenue:0,netProfit=revenue-fullCost,netGp=revenue?netProfit/revenue:0;
+document.getElementById('kpis').innerHTML=[
+['Revenue Excl VAT',money(revenue)],
+['Job Cost',money(jobCost),'warn'],
+['Pending Job Cards',num(pendingManualCards),'warn'],
+['Expenses',money(expenseTotal),'warn'],
+['Salaries',money(salaryTotal),'warn'],
+['Total Cost incl Expenses & Salaries',money(fullCost),'warn'],
+['Gross Profit',money(grossProfit),grossProfit<0?'danger':'good'],
+['Gross GP %',pct(grossGp)],
+['Net Profit',money(netProfit),netProfit<0?'danger':'good'],
+['Net Profit %',pct(netGp)],
+['Financial Jobs',num(rows.length)],
+['Labour Cost',money(labour)],
+['Equipment + Workshop',money(equipment+workshop)]
+].map(c=>`<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2]||''}">${c[1]}</div></div>`).join('');
+bars('profitDiv',groupCoreDivisions(rows,'gross_profit'));
+bars('costDiv',executiveCostByDivision(rows,expenseRows,salaryRows),'expense');
+bars('opsProfit',groupValidOps(rows,'gross_profit'));
+const sort=document.getElementById('dashDateSort')?.value||'desc';
+document.getElementById('latestJobs').innerHTML=sortByDate(rows,'job_date',sort).slice(0,20).map(jobRow).join('')
+}
+function renderJobs(){const s=(document.getElementById('jobSearch')?.value||'').toLowerCase(),d=document.getElementById('jobDivision')?.value||'',o=document.getElementById('jobOps')?.value||'',sort=document.getElementById('jobsDateSort')?.value||'desc';document.getElementById('jobsPager').innerHTML=makePager('jobs','renderJobs');const rows=sortByDate(jobs.filter(j=>`${j.job_number} ${j.invoice_number} ${j.division} ${j.ops_manager}`.toLowerCase().includes(s)&&(!d||j.division===d)&&(!o||j.ops_manager===o)),'job_date',sort);document.getElementById('jobsRows').innerHTML=pageSlice('jobs',rows).map(jobRow).join('')}
+function renderClients(){const s=(document.getElementById('clientSearch')?.value||'').toLowerCase(),sort=document.getElementById('clientSort')?.value||'profit';document.getElementById('clientsPager').innerHTML=makePager('clients','renderClients');const map={};registers.forEach(r=>{if(r.job_number)map[String(r.job_number).trim()]=r});const totals={};jobs.forEach(j=>{const r=map[String(j.job_number||'').trim()]||{};const c=r.client_name||j.client_name||'Unassigned';if(!totals[c])totals[c]={client:c,jobs:0,hours:0,revenue:0,cost:0,profit:0};totals[c].jobs++;totals[c].hours+=Number(j.hours||0);totals[c].revenue+=Number(j.revenue||0);totals[c].cost+=Number(j.total_cost||0);totals[c].profit+=Number(j.gross_profit||0)});const rows=Object.values(totals).filter(r=>r.client.toLowerCase().includes(s)).sort((a,b)=>Number(b[sort]||0)-Number(a[sort]||0));document.getElementById('clientRows').innerHTML=pageSlice('clients',rows).map(r=>`<tr><td>${esc(r.client)}</td><td>${num(r.jobs)}</td><td>${r.hours.toFixed(1)}</td><td>${money(r.revenue)}</td><td>${money(r.cost)}</td><td class="${r.profit<0?'danger':'good'}">${money(r.profit)}</td><td>${pct(r.revenue?r.profit/r.revenue:0)}</td></tr>`).join('')}
+function importedPaidValue(r){return Number(r.payments_made??r.payment_made??r.amount_paid??r.paid??0)}function debtorAgeDays(v){const d=new Date(date(v));if(!v||Number.isNaN(d.getTime()))return 0;return Math.max(0,Math.floor((Date.now()-d.getTime())/86400000))}function debtorBucket(days){if(days<=30)return'0-30';if(days<=60)return'31-60';if(days<=90)return'61-90';if(days<=120)return'91-120';return'120+'}
+function invoiceRowsData(){const map={};jobs.forEach(j=>{map[String(j.job_number||'').trim()]=j});return registers.map(r=>{const j=map[String(r.job_number||'').trim()]||{};const invoice=String(r.invoice_number||j.invoice_number||'').trim();const regVal=Number(r.value_excl_vat||0);const revenue=Number(j.revenue||0);const diff=regVal-revenue;let status=invoice?'Invoiced':'Missing invoice';if(revenue>0&&!invoice)status='Revenue but no invoice';if(invoice&&revenue===0)status='Invoice but zero revenue';return{status,job:r.job_number,date:r.job_date||j.job_date,client:r.client_name||j.client_name||'Unassigned',division:r.division||j.division||'',ops:r.ops_manager||j.ops_manager||'Unassigned',invoice,regVal,revenue,diff,paid:importedPaidValue(r)}})}
+function setInvoiceFilterOptions(){const rows=invoiceRowsData();setOptions('invoiceOps','All OPS managers',[...new Set(rows.map(r=>r.ops).filter(Boolean))].sort());setOptions('invoiceDivision','All divisions',[...new Set(rows.map(r=>r.division).filter(Boolean))].sort())}
+function renderInvoice(){let rows=invoiceRowsData();const q=(document.getElementById('invoiceSearch')?.value||'').toLowerCase(),status=document.getElementById('invoiceStatus')?.value||'',ops=document.getElementById('invoiceOps')?.value||'',division=document.getElementById('invoiceDivision')?.value||'',sort=document.getElementById('invoiceDateSort')?.value||'desc';rows=sortByDate(rows.filter(r=>`${r.status} ${r.invoice} ${r.job} ${r.client} ${r.ops} ${r.division}`.toLowerCase().includes(q)&&(!status||r.status===status)&&(!ops||r.ops===ops)&&(!division||r.division===division)),'date',sort);const invoiced=rows.filter(r=>r.invoice).length,missing=rows.filter(r=>!r.invoice).length,missingRevenue=rows.filter(r=>r.revenue>0&&!r.invoice).reduce((s,r)=>s+r.revenue,0),regTotal=rows.reduce((s,r)=>s+r.regVal,0),finTotal=rows.reduce((s,r)=>s+r.revenue,0);document.getElementById('invoicePager').innerHTML=makePager('invoice','renderInvoice');document.getElementById('invoiceKpis').innerHTML=[['Register Jobs',num(rows.length)],['Invoiced',num(invoiced),'good'],['Missing Invoice',num(missing),'danger'],['Revenue No Invoice',money(missingRevenue),'danger'],['Register Excl VAT',money(regTotal)],['Financial Revenue',money(finTotal)],['Difference',money(regTotal-finTotal),Math.abs(regTotal-finTotal)>1?'warn':'good']].map(c=>`<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2]||''}">${c[1]}</div></div>`).join('');document.getElementById('invoiceRows').innerHTML=pageSlice('invoice',rows).map(r=>`<tr><td class="${r.status.includes('no invoice')||r.status.includes('Missing')?'danger':r.status.includes('zero')?'warn':'good'}">${esc(r.status)}</td><td>${esc(r.ops)}</td><td>${esc(r.job)}</td><td>${date(r.date)}</td><td>${esc(r.client)}</td><td>${esc(r.division)}</td><td>${esc(r.invoice)}</td><td>${money(r.regVal)}</td><td>${money(r.revenue)}</td><td class="${Math.abs(r.diff)>1?'warn':'good'}">${money(r.diff)}</td></tr>`).join('')||'<tr><td colspan="10" class="muted">No invoice data.</td></tr>'}
+function debtorsRowsData(){return invoiceRowsData().filter(r=>r.invoice).map(r=>{const invoiceValue=Number(r.regVal||r.revenue||0);const importedPaid=Number(r.paid||0);const paid=importedPaid>0?importedPaid:invoiceValue;const outstanding=Math.max(0,invoiceValue-paid);const ageDays=debtorAgeDays(r.date);const agingBucket=debtorBucket(ageDays);return{...r,invoiceValue,paid,outstanding,ageDays,agingBucket,status:outstanding<=1&&invoiceValue>0?'Paid':paid>0?'Partial':'Outstanding'}})}
+function setDebtorsFilterOptions(){const rows=debtorsRowsData();setOptions('debtorsClient','All clients',[...new Set(rows.map(r=>r.client).filter(Boolean))].sort());setOptions('debtorsOps','All OPS managers',[...new Set(rows.map(r=>r.ops).filter(Boolean))].sort());setOptions('debtorsDivision','All divisions',[...new Set(rows.map(r=>r.division).filter(Boolean))].sort())}
+function filteredDebtorsRows(){const rows=debtorsRowsData();const q=(document.getElementById('debtorsSearch')?.value||'').toLowerCase(),client=document.getElementById('debtorsClient')?.value||'',ops=document.getElementById('debtorsOps')?.value||'',division=document.getElementById('debtorsDivision')?.value||'',status=document.getElementById('debtorsStatus')?.value||'',aging=document.getElementById('debtorsAging')?.value||'';return rows.filter(r=>`${r.invoice} ${r.job} ${r.client} ${r.ops} ${r.division} ${r.agingBucket}`.toLowerCase().includes(q)&&(!client||r.client===client)&&(!ops||r.ops===ops)&&(!division||r.division===division)&&(!status||r.status===status)&&(!aging||r.agingBucket===aging))}
+function renderDebtors(){const rows=filteredDebtorsRows();const invoiceValue=rows.reduce((s,r)=>s+r.invoiceValue,0),paid=rows.reduce((s,r)=>s+r.paid,0),outstanding=rows.reduce((s,r)=>s+r.outstanding,0);document.getElementById('debtorsKpis').innerHTML=[['Invoices',num(rows.length)],['Invoice Value',money(invoiceValue)],['Paid',money(paid),'good'],['Outstanding',money(outstanding),'danger'],['Paid Invoices',num(rows.filter(r=>r.status==='Paid').length),'good'],['Partial',num(rows.filter(r=>r.status==='Partial').length),'warn'],['Outstanding Count',num(rows.filter(r=>r.status==='Outstanding').length),'danger'],['0-30 Days',money(rows.filter(r=>r.agingBucket==='0-30').reduce((s,r)=>s+r.outstanding,0))],['31-60 Days',money(rows.filter(r=>r.agingBucket==='31-60').reduce((s,r)=>s+r.outstanding,0)),'warn'],['61-90 Days',money(rows.filter(r=>r.agingBucket==='61-90').reduce((s,r)=>s+r.outstanding,0)),'warn'],['91-120 Days',money(rows.filter(r=>r.agingBucket==='91-120').reduce((s,r)=>s+r.outstanding,0)),'danger'],['120+ Days',money(rows.filter(r=>r.agingBucket==='120+').reduce((s,r)=>s+r.outstanding,0)),'danger']].map(c=>`<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2]||''}">${c[1]}</div></div>`).join('');const size=Number(document.getElementById('debtorsPageSize')?.value||25);const pages=Math.max(1,Math.ceil(rows.length/size));debtorsPage=Math.min(Math.max(1,debtorsPage),pages);const slice=rows.slice((debtorsPage-1)*size,debtorsPage*size);document.getElementById('debtorsRows').innerHTML=slice.map(r=>`<tr><td>${esc(r.invoice)}</td><td>${esc(r.job)}</td><td>${date(r.date)}</td><td>${esc(r.client)}</td><td>${esc(r.ops)}</td><td>${esc(r.division)}</td><td>${money(r.invoiceValue)}</td><td class="good">${money(r.paid)}</td><td class="${r.outstanding>0?'danger':'good'}">${money(r.outstanding)}</td><td>${num(r.ageDays)} days</td><td>${esc(r.agingBucket)}</td><td>${esc(r.status)}</td></tr>`).join('')||'<tr><td colspan="12" class="muted">No debtors data.</td></tr>';const info=document.getElementById('debtorsPageInfo');if(info)info.textContent=`Showing ${rows.length?((debtorsPage-1)*size+1):0}-${Math.min(debtorsPage*size,rows.length)} of ${rows.length} rows • Page ${debtorsPage} of ${pages}`;const prev=document.getElementById('debtorsPrev'),next=document.getElementById('debtorsNext');if(prev)prev.disabled=debtorsPage<=1;if(next)next.disabled=debtorsPage>=pages}
+function downloadDebtorsCsv(){const csv=[['Invoice','Job','Date','Client','OPS Manager','Division','Invoice Value','Paid','Outstanding','Age Days','Aging Bucket','Status'],...filteredDebtorsRows().map(r=>[r.invoice,r.job,date(r.date),r.client,r.ops,r.division,r.invoiceValue,r.paid,r.outstanding,r.ageDays,r.agingBucket,r.status])].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='b4-debtors-collections.csv';a.click();URL.revokeObjectURL(url)}
+function qualityIssues(){const issues=[];const regByJob={};registers.forEach(r=>{if(r.job_number)regByJob[String(r.job_number).trim()]=r});jobs.forEach(j=>{const r=regByJob[String(j.job_number||'').trim()]||{};const client=r.client_name||j.client_name||'';const ops=r.ops_manager||j.ops_manager||'';const invoice=r.invoice_number||j.invoice_number||'';const revenue=Number(j.revenue||0),cost=Number(j.total_cost||0),profit=Number(j.gross_profit||0);const base={job:j.job_number,invoice,date:j.job_date,client,ops,division:j.division,revenue,cost,profit};if(!invoice&&revenue>0)issues.push({...base,severity:'Critical',type:'Missing invoice number',note:'Revenue exists but no invoice number found.'});if(!client)issues.push({...base,severity:'Warning',type:'Missing client',note:'Client is blank in Job Register / Data.'});if(!ops)issues.push({...base,severity:'Warning',type:'Missing OPS manager',note:'OPS manager is blank.'});if(revenue===0&&cost>0)issues.push({...base,severity:'Critical',type:'Revenue is zero with cost',note:'Costs exist but revenue is zero.'});if(profit<0)issues.push({...base,severity:'Critical',type:'Negative profit',note:'Job is loss-making.'})});return issues}
+function filteredQualityIssues(){const q=(document.getElementById('qualitySearch')?.value||'').toLowerCase(),sev=document.getElementById('qualitySeverity')?.value||'',type=document.getElementById('qualityType')?.value||'',ops=document.getElementById('qualityOps')?.value||'',division=document.getElementById('qualityDivision')?.value||'';return qualityIssues().filter(i=>`${i.severity} ${i.type} ${i.job} ${i.invoice} ${i.client} ${i.ops} ${i.division} ${i.note}`.toLowerCase().includes(q)&&(!sev||i.severity===sev)&&(!type||i.type===type)&&(!ops||i.ops===ops)&&(!division||i.division===division))}
+function setQualityFilterOptions(){const issues=qualityIssues();setOptions('qualityType','All issue types',[...new Set(issues.map(i=>i.type).filter(Boolean))].sort());setOptions('qualityOps','All OPS managers',[...new Set(issues.map(i=>i.ops).filter(Boolean))].sort());setOptions('qualityDivision','All divisions',[...new Set(issues.map(i=>i.division).filter(Boolean))].sort())}
+function renderQuality(){const sort=document.getElementById('qualityDateSort')?.value||'desc';const issues=sortByDate(filteredQualityIssues(),'date',sort);const critical=issues.filter(i=>i.severity==='Critical').length,warning=issues.filter(i=>i.severity==='Warning').length;document.getElementById('qualityPager').innerHTML=makePager('quality','renderQuality');document.getElementById('qualityKpis').innerHTML=[['Total Issues',num(issues.length),issues.length?'danger':'good'],['Critical',num(critical),critical?'danger':'good'],['Warnings',num(warning),warning?'warn':'good'],['Negative Profit',num(issues.filter(i=>i.type==='Negative profit').length),'danger'],['Missing Invoices',num(issues.filter(i=>i.type==='Missing invoice number').length),'danger'],['Missing Clients',num(issues.filter(i=>i.type==='Missing client').length),'warn'],['Missing OPS',num(issues.filter(i=>i.type==='Missing OPS manager').length),'warn']].map(c=>`<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2]||''}">${c[1]}</div></div>`).join('');document.getElementById('qualityRows').innerHTML=pageSlice('quality',issues).map(i=>`<tr><td class="${i.severity==='Critical'?'danger':'warn'}">${esc(i.severity)}</td><td>${esc(i.type)}</td><td>${esc(i.job)}</td><td>${esc(i.invoice)}</td><td>${date(i.date)}</td><td>${esc(i.client)}</td><td>${esc(i.ops)}</td><td>${esc(i.division)}</td><td>${money(i.revenue)}</td><td>${money(i.cost)}</td><td class="${i.profit<0?'danger':'good'}">${money(i.profit)}</td><td>${esc(i.note)}</td></tr>`).join('')||'<tr><td colspan="12" class="muted">No quality issues found.</td></tr>'}
+function downloadQualityCsv(){const csv=[['Severity','Issue Type','Job','Invoice','Date','Client','OPS','Division','Revenue','Cost','Profit','Note'],...filteredQualityIssues().map(i=>[i.severity,i.type,i.job,i.invoice,date(i.date),i.client,i.ops,i.division,i.revenue,i.cost,i.profit,i.note])].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='b4-data-quality.csv';a.click();URL.revokeObjectURL(url)}
+function opsScoreRows(){const reg={};registers.forEach(r=>{if(r.job_number)reg[String(r.job_number).trim()]=r});const m={};jobs.forEach(j=>{const r=reg[String(j.job_number||'').trim()]||{};const ops=r.ops_manager||j.ops_manager||'Unassigned';if(!m[ops])m[ops]={ops,jobs:0,revenue:0,cost:0,profit:0,hours:0,missingInvoices:0,lossJobs:0};m[ops].jobs++;m[ops].revenue+=Number(j.revenue||0);m[ops].cost+=Number(j.total_cost||0);m[ops].profit+=Number(j.gross_profit||0);m[ops].hours+=Number(j.hours||0);const invoice=r.invoice_number||j.invoice_number||'';if(!invoice&&Number(j.revenue||0)>0)m[ops].missingInvoices++;if(Number(j.gross_profit||0)<0)m[ops].lossJobs++});return Object.values(m).map(r=>({...r,gp:r.revenue?r.profit/r.revenue:0,revenuePerHour:r.hours?r.revenue/r.hours:0}))}
+function filteredOpsRows(){const q=(document.getElementById('opsSearch')?.value||'').toLowerCase(),sort=document.getElementById('opsSort')?.value||'profit',minJobs=Number(document.getElementById('opsMinJobs')?.value||0);return opsScoreRows().filter(r=>r.ops.toLowerCase().includes(q)&&r.jobs>=minJobs).sort((a,b)=>Number(b[sort]||0)-Number(a[sort]||0))}
+function renderOps(){const rows=filteredOpsRows();const revenue=rows.reduce((s,r)=>s+r.revenue,0),profit=rows.reduce((s,r)=>s+r.profit,0),hours=rows.reduce((s,r)=>s+r.hours,0),jobsCount=rows.reduce((s,r)=>s+r.jobs,0);document.getElementById('opsPager').innerHTML=makePager('ops','renderOps');document.getElementById('opsKpis').innerHTML=[['OPS Managers',num(rows.length)],['Jobs',num(jobsCount)],['Revenue',money(revenue)],['Profit',money(profit),profit<0?'danger':'good'],['Hours',hours.toFixed(1)],['Missing Invoices',num(rows.reduce((s,r)=>s+r.missingInvoices,0)),'warn'],['Loss Jobs',num(rows.reduce((s,r)=>s+r.lossJobs,0)),'danger']].map(c=>`<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2]||''}">${c[1]}</div></div>`).join('');document.getElementById('opsRows').innerHTML=pageSlice('ops',rows).map(r=>`<tr><td>${esc(r.ops)}</td><td>${num(r.jobs)}</td><td>${money(r.revenue)}</td><td>${money(r.cost)}</td><td class="${r.profit<0?'danger':'good'}">${money(r.profit)}</td><td>${pct(r.gp)}</td><td>${r.hours.toFixed(1)}</td><td>${money(r.revenuePerHour)}</td><td class="${r.missingInvoices?'warn':'good'}">${num(r.missingInvoices)}</td><td class="${r.lossJobs?'danger':'good'}">${num(r.lossJobs)}</td></tr>`).join('')||'<tr><td colspan="10" class="muted">No OPS data.</td></tr>'}
+function downloadOpsCsv(){const csv=[['OPS Manager','Jobs','Revenue','Total Cost','Profit','GP %','Hours','Revenue / Hour','Missing Invoices','Loss Jobs'],...filteredOpsRows().map(r=>[r.ops,r.jobs,r.revenue,r.cost,r.profit,(r.gp*100).toFixed(1)+'%',r.hours,r.revenuePerHour,r.missingInvoices,r.lossJobs])].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='b4-ops-scorecard.csv';a.click();URL.revokeObjectURL(url)}
+function analyticsRows(){const reg=registerLookup();return jobs.map(j=>{const r=reg[String(j.job_number||'').trim()]||{};const client=r.client_name||j.client_name||'Unassigned';const revenue=Number(j.revenue||0),cost=Number(j.total_cost||0),profit=Number(j.gross_profit||0),hours=Number(j.hours||0);return {...j,client_name:client,revenue,cost,total_cost:cost,gross_profit:profit,hours,gp:revenue?profit/revenue:0}})}
+function filteredAnalyticsRows(){const q=(document.getElementById('analyticsSearch')?.value||'').toLowerCase(),y=document.getElementById('analyticsYear')?.value||'',m=document.getElementById('analyticsMonth')?.value||'',d=document.getElementById('analyticsDivision')?.value||'',o=document.getElementById('analyticsOps')?.value||'',c=document.getElementById('analyticsClient')?.value||'';return analyticsRows().filter(j=>{const dt=date(j.job_date);return `${j.job_number} ${j.invoice_number} ${j.client_name} ${j.ops_manager} ${j.division}`.toLowerCase().includes(q)&&(!y||dt.slice(0,4)===y)&&(!m||dt.slice(5,7)===m)&&(!d||j.division===d)&&(!o||j.ops_manager===o)&&(!c||j.client_name===c)})}
+function setAnalyticsFilterOptions(){const rows=analyticsRows();setOptions('analyticsYear','All years',[...new Set(rows.map(j=>date(j.job_date).slice(0,4)).filter(Boolean))].sort().reverse());document.getElementById('analyticsMonth').innerHTML='<option value="">All months</option>'+monthNames.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('');setOptions('analyticsDivision','All divisions',[...new Set(rows.map(j=>j.division).filter(Boolean))].sort());setOptions('analyticsOps','All OPS managers',[...new Set(rows.map(j=>j.ops_manager).filter(Boolean))].sort());setOptions('analyticsClient','All clients',[...new Set(rows.map(j=>j.client_name).filter(Boolean))].sort())}
+function analyticsSummary(rows,key,label){const m={};rows.forEach(j=>{const k=key(j)||'Unassigned';if(!m[k])m[k]={name:k,jobs:0,hours:0,revenue:0,cost:0,profit:0};m[k].jobs++;m[k].hours+=Number(j.hours||0);m[k].revenue+=Number(j.revenue||0);m[k].cost+=Number(j.total_cost||0);m[k].profit+=Number(j.gross_profit||0)});const sort=document.getElementById('analyticsSort')?.value||'profit';const out=Object.values(m).map(r=>({...r,gp:r.revenue?r.profit/r.revenue:0}));if(sort==='dateAsc')return out.sort((a,b)=>String(a.name).localeCompare(String(b.name)));if(sort==='dateDesc')return out.sort((a,b)=>String(b.name).localeCompare(String(a.name)));return out.sort((a,b)=>Number(b[sort]||0)-Number(a[sort]||0))}
+function renderAnalyticsTable(id,rows){const size=Number(document.getElementById('analyticsPageSize')?.value||25);document.getElementById(id).innerHTML=rows.slice(0,size).map(r=>`<tr><td>${esc(r.name)}</td><td>${num(r.jobs)}</td><td>${Number(r.hours||0).toFixed(1)}</td><td>${money(r.revenue)}</td><td>${money(r.cost)}</td><td class="${r.profit<0?'danger':'good'}">${money(r.profit)}</td><td>${pct(r.gp)}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">No analytics data.</td></tr>'}
+function renderAnalytics(){const rows=filteredAnalyticsRows();const revenue=rows.reduce((s,j)=>s+j.revenue,0),cost=rows.reduce((s,j)=>s+j.total_cost,0),profit=rows.reduce((s,j)=>s+j.gross_profit,0),hours=rows.reduce((s,j)=>s+j.hours,0),gp=revenue?profit/revenue:0;document.getElementById('analyticsKpis').innerHTML=[['Jobs',num(rows.length)],['Revenue',money(revenue)],['Total Cost',money(cost),'warn'],['Profit',money(profit),profit<0?'danger':'good'],['GP %',pct(gp)],['Hours',hours.toFixed(1)],['Revenue / Hour',money(hours?revenue/hours:0)],['Avg Profit / Job',money(rows.length?profit/rows.length:0)]].map(c=>`<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2]||''}">${c[1]}</div></div>`).join('');renderAnalyticsTable('analyticsMonthRows',analyticsSummary(rows,j=>{const dt=date(j.job_date);return dt?dt.slice(0,7):'Unknown'}));renderAnalyticsTable('analyticsDivisionRows',analyticsSummary(rows,j=>j.division));renderAnalyticsTable('analyticsOpsRows',analyticsSummary(rows,j=>j.ops_manager));renderAnalyticsTable('analyticsClientRows',analyticsSummary(rows,j=>j.client_name))}
+function downloadAnalyticsCsv(){const csv=[['Job','Date','Invoice','Client','Division','OPS','Hours','Revenue','Total Cost','Gross Profit','GP %'],...filteredAnalyticsRows().map(j=>[j.job_number,date(j.job_date),j.invoice_number,j.client_name,j.division,j.ops_manager,j.hours,j.revenue,j.total_cost,j.gross_profit,(j.gp*100).toFixed(1)+'%'])].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='b4-analytics.csv';a.click();URL.revokeObjectURL(url)}
+function renderRegister(){const s=(document.getElementById('registerSearch')?.value||'').toLowerCase(),sort=document.getElementById('registerDateSort')?.value||'desc';document.getElementById('registerPager').innerHTML=makePager('register','renderRegister');const rows=sortByDate(registers.filter(r=>`${r.job_number} ${r.client_name} ${r.invoice_number} ${r.description}`.toLowerCase().includes(s)),'job_date',sort);document.getElementById('registerRows').innerHTML=pageSlice('register',rows).map(r=>`<tr><td>${esc(r.job_number)}</td><td>${date(r.job_date)}</td><td>${esc(r.ops_manager)}</td><td>${esc(r.division)}</td><td>${esc(r.client_name)}</td><td>${esc(r.description)}</td><td>${esc(r.quote_number)}</td><td>${esc(r.po_number)}</td><td>${esc(r.invoice_number)}</td><td>${money(r.value_incl_vat)}</td><td>${money(r.value_excl_vat)}</td></tr>`).join('')}
+function linkedCardTotal(r){return Number(r.linked_card_cost||0)||Number(r.imported_card_cost||0)+Number(r.manual_card_cost||0)}
+function renderJobProfit(){const q=(document.getElementById('jobProfitSearch')?.value||'').toLowerCase();const mode=document.getElementById('jobProfitMode')?.value||'all';let rows=(jobProfit||[]).filter(r=>`${r.job_number} ${r.client_name} ${r.ops_manager} ${r.division}`.toLowerCase().includes(q));if(mode==='manual')rows=rows.filter(r=>Number(r.manual_card_cost||0)!==0);if(mode==='loss')rows=rows.filter(r=>Number(r.profit_with_cards||0)<0);rows=rows.filter(r=>linkedCardTotal(r)!==0||Number(r.revenue||0)!==0).slice(0,100);document.getElementById('jobProfitRows').innerHTML=rows.map(r=>`<tr onclick="selectJobForBreakdown('${esc(String(r.job_number||'')).replace(/'/g,'&#39;')}')"><td>${esc(r.job_number)}</td><td>${date(r.job_date)}</td><td>${esc(r.client_name)}</td><td>${esc(r.ops_manager)}</td><td>${esc(r.division)}</td><td>${money(r.revenue)}</td><td>${money(r.imported_card_cost)}</td><td class="warn">${money(r.manual_card_cost)}</td><td class="warn">${money(linkedCardTotal(r))}</td><td class="${Number(r.profit_with_cards||0)<0?'danger':'good'}">${money(r.profit_with_cards)}</td><td>${pct(r.margin_with_cards)}</td></tr>`).join('')||'<tr><td colspan="11" class="muted">No linked job-card profit data yet.</td></tr>'}
+function selectJobForBreakdown(jobNumber){const el=document.getElementById('manualJobNumber');if(el)el.value=jobNumber;autofillManualJobCard();renderSelectedJobLinkSummary()}
+function renderSelectedJobLinkSummary(){if(!canSeeAdmin())return;const n=String(document.getElementById('manualJobNumber')?.value||'').trim();const box=document.getElementById('selectedJobLinkSummary');const breakdown=document.getElementById('jobCardBreakdown');if(!n){if(box)box.style.display='none';if(breakdown)breakdown.textContent='No job selected.';return}const profit=(jobProfit||[]).find(r=>String(r.job_number||'').trim()===n)||{};const linked=(cards||[]).filter(c=>String(c.job_number||'').trim()===n);const labour=linked.reduce((s,c)=>s+Number(c.labour_cost||0),0),equip=linked.reduce((s,c)=>s+Number(c.equipment_cost||0),0),workshop=linked.reduce((s,c)=>s+Number(c.workshop_cost||0),0),mat=linked.reduce((s,c)=>s+Number(c.material_cost||0),0),other=linked.reduce((s,c)=>s+Number(c.other_cost||0),0),hours=linked.reduce((s,c)=>s+Number(c.hours||0),0),cost=labour+equip+workshop+mat+other;const revenue=Number(profit.revenue||0);const finalProfit=revenue-cost;const margin=revenue?finalProfit/revenue:0;if(box){box.style.display='block';box.innerHTML=`<h3>Linked Job ${esc(n)}</h3><div class="grid"><div class="card"><div class="label">Client</div><div class="value" style="font-size:16px">${esc(profit.client_name||document.getElementById('manualClient')?.value||'')}</div></div><div class="card"><div class="label">Revenue</div><div class="value good">${money(revenue)}</div></div><div class="card"><div class="label">Linked Card Cost</div><div class="value warn">${money(cost)}</div></div><div class="card"><div class="label">Profit</div><div class="value ${finalProfit<0?'danger':'good'}">${money(finalProfit)}</div></div><div class="card"><div class="label">Margin</div><div class="value">${pct(margin)}</div></div><div class="card"><div class="label">Linked Cards</div><div class="value">${linked.length}</div></div></div>`}if(breakdown){breakdown.innerHTML=`<div class="grid"><div class="card"><div class="label">Labour</div><div class="value">${money(labour)}</div></div><div class="card"><div class="label">Equipment</div><div class="value">${money(equip)}</div></div><div class="card"><div class="label">Workshop</div><div class="value">${money(workshop)}</div></div><div class="card"><div class="label">Materials</div><div class="value">${money(mat)}</div></div><div class="card"><div class="label">Other</div><div class="value">${money(other)}</div></div><div class="card"><div class="label">Hours</div><div class="value">${hours.toFixed(2)}</div></div></div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Source</th><th>Date</th><th>Vessel</th><th>Activity</th><th>Staff</th><th>Work Done</th><th>Hours</th><th>Total Cost</th></tr></thead><tbody>${linked.map(c=>{const t=Number(c.total_cost||0)||Number(c.labour_cost||0)+Number(c.equipment_cost||0)+Number(c.workshop_cost||0)+Number(c.material_cost||0)+Number(c.other_cost||0);return `<tr><td>${esc(c.source||'import')}</td><td>${date(c.job_date)}</td><td>${esc(c.vessel_name)}</td><td>${esc(c.activity_type)}</td><td>${esc(c.staff_names)}</td><td>${esc(c.description)}</td><td>${Number(c.hours||0).toFixed(2)}</td><td>${money(t)}</td></tr>`}).join('')||'<tr><td colspan="8" class="muted">No cards linked to this job yet.</td></tr>'}</tbody></table></div>`}}
+function setJobCardFilterOptions(){
+fillSelect('cardsOpsFilter',[...new Set(cards.map(c=>c.ops_manager).filter(Boolean))],'All OPS managers');
+fillSelect('cardsVesselFilter',[...new Set(cards.map(c=>c.vessel_name).filter(Boolean))],'All vessels');
+fillSelect('cardsActivityFilter',[...new Set(cards.map(c=>c.activity_type).filter(Boolean))],'All activities')
+}
+function renderCards(){
+const s=(document.getElementById('cardsSearch')?.value||'').toLowerCase(),sort=document.getElementById('cardsDateSort')?.value||'desc',src=document.getElementById('cardsSource')?.value||'',ops=document.getElementById('cardsOpsFilter')?.value||'',vessel=document.getElementById('cardsVesselFilter')?.value||'',activity=document.getElementById('cardsActivityFilter')?.value||'';
+document.getElementById('cardsPager').innerHTML=makePager('cards','renderCards');
+const rows=sortByDate(cards.filter(r=>{
+const source=String(r.source||'imported').toLowerCase();
+const isManual=source.includes('manual')||source.includes('offshore');
+return `${r.job_number} ${r.client_name} ${r.location} ${r.vessel_name} ${r.ops_manager} ${r.activity_type} ${r.staff_names} ${r.equipment_used} ${r.description}`.toLowerCase().includes(s)
+&&(!src||(src==='manual'?isManual:!isManual))
+&&(!ops||r.ops_manager===ops)
+&&(!vessel||r.vessel_name===vessel)
+&&(!activity||r.activity_type===activity)
+}),'job_date',sort);
+renderPendingReviews();
+document.getElementById('cardRows').innerHTML=pageSlice('cards',rows).map(r=>{const total=Number(r.total_cost||0)||Number(r.labour_cost||0)+Number(r.equipment_cost||0)+Number(r.workshop_cost||0)+Number(r.material_cost||0)+Number(r.other_cost||0);return `<tr><td>${esc(r.source||'import')}</td><td>${esc(r.completed_by_name||'')}</td><td>${esc(r.job_number)}</td><td>${date(r.job_date)}</td><td>${esc(r.client_name)}</td><td>${esc(r.location)}</td><td>${esc(r.vessel_name)}</td><td>${esc(r.ops_manager)}</td><td>${esc(r.activity_type)}</td><td>${esc(r.staff_names)}</td><td>${esc(r.equipment_used)}</td><td>${esc(r.description)}</td><td>${Number(r.hours||0).toFixed(2)}</td><td>${money(r.labour_cost)}</td><td>${money(r.equipment_cost)}</td><td>${money(r.workshop_cost)}</td><td>${money(r.material_cost)}</td><td>${money(r.other_cost)}</td><td class="warn">${money(total)}</td><td>${esc(r.division)}</td></tr>`}).join('')
+}
+function renderSalaries(){document.getElementById('salariesPager').innerHTML=makePager('salaries','renderSalaries');document.getElementById('salaryRows').innerHTML=pageSlice('salaries',salaries).map(r=>`<tr><td>${esc(r.salary_year)}</td><td>${esc(r.salary_month)}</td><td>${money(r.total_salaries)}</td></tr>`).join('')}function renderImports(){document.getElementById('importsPager').innerHTML=makePager('imports','renderImports');document.getElementById('importRows').innerHTML=pageSlice('imports',imports).map(i=>`<tr><td>${esc(i.filename)}</td><td>${esc(i.imported_rows)}</td><td>${esc(i.ws_rows||0)}</td><td>${esc(i.expense_rows||0)}</td><td>${esc(i.vessel_rows||0)}</td><td>${esc(i.salary_rows||0)}</td><td>${esc(i.status)}</td><td>${i.imported_at?new Date(i.imported_at).toLocaleString():''}</td></tr>`).join('')}
+function vesselFinancialRows(){
+const jobsByNumber={};
+jobs.forEach(j=>{const key=String(j.job_number||'').trim();if(key)jobsByNumber[key]=j});
+const vesselCountByJob={};
+vessels.forEach(v=>{const key=String(v.job_number||'').trim();if(key)vesselCountByJob[key]=(vesselCountByJob[key]||0)+1});
+return vessels.map(v=>{
+const key=String(v.job_number||'').trim();
+const job=jobsByNumber[key]||{};
+const split=Math.max(1,vesselCountByJob[key]||1);
+const jobRevenue=Number(job.revenue||0)/split;
+const labour=Number(v.labour_cost||0);
+const equipment=Number(v.equipment_cost||0);
+const workshop=Number(v.workshop_cost||0);
+const fallbackCost=Number(job.total_cost||0)/split;
+const totalCost=labour+equipment+workshop || fallbackCost;
+const profit=jobRevenue-totalCost;
+return {...v,revenue:jobRevenue,total_cost:totalCost,gross_profit:profit,invoice_number:job.invoice_number||'',job_financial_match:Boolean(job.job_number)}
+})
+}
+function filteredVesselRows(){
+const q=(document.getElementById('vesselSearch')?.value||'').toLowerCase();
+const vessel=document.getElementById('vesselFilter')?.value||'';
+const client=document.getElementById('vesselClient')?.value||'';
+const ops=document.getElementById('vesselOpsFilter')?.value||'';
+const division=document.getElementById('vesselDivision')?.value||'';
+const year=document.getElementById('vesselYear')?.value||'';
+const month=document.getElementById('vesselMonthFilter')?.value||'';
+const profitStatus=document.getElementById('vesselProfitStatus')?.value||'';
+const sort=document.getElementById('vesselDateSort')?.value||'desc';
+return sortByDate(vesselFinancialRows().filter(r=>{
+const dt=date(r.job_date);
+return `${r.vessel_name} ${r.job_number} ${r.client_name} ${r.ops_manager} ${r.description} ${r.division} ${r.invoice_number}`.toLowerCase().includes(q)
+&&(!vessel||r.vessel_name===vessel)
+&&(!client||r.client_name===client)
+&&(!ops||r.ops_manager===ops)
+&&(!division||r.division===division)
+&&(!year||dt.slice(0,4)===year)
+&&(!month||dt.slice(5,7)===month)
+&&(!profitStatus||(profitStatus==='profit'?Number(r.gross_profit||0)>=0:Number(r.gross_profit||0)<0))
+}),'job_date',sort)
+}
+function setVesselFilterOptions(){
+const rows=vesselFinancialRows();
+setOptions('vesselFilter','All vessels',[...new Set(rows.map(r=>r.vessel_name).filter(Boolean))].sort());
+setOptions('vesselClient','All clients',[...new Set(rows.map(r=>r.client_name).filter(Boolean))].sort());
+setOptions('vesselOpsFilter','All OPS managers',[...new Set(rows.map(r=>r.ops_manager).filter(Boolean))].sort());
+setOptions('vesselDivision','All divisions',[...new Set(rows.map(r=>r.division).filter(Boolean))].sort());
+setOptions('vesselYear','All years',[...new Set(rows.map(r=>date(r.job_date).slice(0,4)).filter(Boolean))].sort().reverse());
+const monthEl=document.getElementById('vesselMonthFilter');
+if(monthEl)monthEl.innerHTML='<option value="">All months</option>'+monthNames.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('')
+}
+function renderVessels(){
+if(!document.getElementById('vesselKpis'))return;
+const rows=filteredVesselRows();
+const totalHours=rows.reduce((s,r)=>s+Number(r.hours||0),0);
+const revenue=rows.reduce((s,r)=>s+Number(r.revenue||0),0);
+const cost=rows.reduce((s,r)=>s+Number(r.total_cost||0),0);
+const profit=rows.reduce((s,r)=>s+Number(r.gross_profit||0),0);
+const uniqueJobs=new Set(rows.map(r=>r.job_number).filter(Boolean)).size;
+const vesselNames=[...new Set(rows.map(r=>r.vessel_name).filter(Boolean))];
+const topVessel=Object.values(rows.reduce((m,r)=>{const k=r.vessel_name||'Unassigned';if(!m[k])m[k]={name:k,hours:0,jobs:new Set()};m[k].hours+=Number(r.hours||0);if(r.job_number)m[k].jobs.add(r.job_number);return m},{})).sort((a,b)=>b.hours-a.hours)[0];
+document.getElementById('vesselKpis').innerHTML=[
+['Vessel Records',num(rows.length)],
+['Unique Vessel Jobs',num(uniqueJobs)],
+['Revenue',money(revenue),'good'],
+['Profit',money(profit),profit<0?'danger':'good'],
+['Total Cost',money(cost),'warn'],
+['Total Hours',totalHours.toFixed(1)],
+['Active Vessels',num(vesselNames.length)],
+['Most Used Vessel',esc(topVessel?topVessel.name:'None')]
+].map(c=>`<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2]||''}">${c[1]}</div></div>`).join('');
+const vesselSummary=Object.values(rows.reduce((m,r)=>{const k=r.vessel_name||'Unassigned';if(!m[k])m[k]={name:k,hours:0,jobs:new Set(),revenue:0,cost:0,profit:0};m[k].hours+=Number(r.hours||0);m[k].revenue+=Number(r.revenue||0);m[k].cost+=Number(r.total_cost||0);m[k].profit+=Number(r.gross_profit||0);if(r.job_number)m[k].jobs.add(r.job_number);return m},{})).map(r=>({...r,jobsCount:r.jobs.size})).sort((a,b)=>b.revenue-a.revenue);
+bars('vesselRevenue',vesselSummary.map(r=>({name:r.name,total:r.revenue})));
+bars('vesselProfit',vesselSummary.map(r=>({name:r.name,total:r.profit})));
+bars('vesselHours',vesselSummary.map(r=>({name:r.name,total:r.hours})),'count');
+const monthSummary=Object.values(rows.reduce((m,r)=>{const k=date(r.job_date).slice(0,7)||'Unknown';if(!m[k])m[k]={name:k,total:0};m[k].total+=Number(r.hours||0);return m},{})).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+bars('vesselMonthChart',monthSummary,'count');
+const opsSummary=Object.values(rows.reduce((m,r)=>{const k=r.ops_manager||'Unassigned';if(!m[k])m[k]={name:k,total:0};m[k].total+=Number(r.hours||0);return m},{})).sort((a,b)=>b.total-a.total);
+bars('vesselOpsChart',opsSummary,'count');
+document.getElementById('vesselsPager').innerHTML=makePager('vessels','renderVessels');
+document.getElementById('vesselRows').innerHTML=pageSlice('vessels',rows).map(r=>`<tr><td>${date(r.job_date)}</td><td>${esc(r.vessel_name)}</td><td>${esc(r.job_number)}</td><td>${esc(r.client_name)}</td><td>${esc(r.ops_manager)}</td><td>${esc(r.description)}</td><td>${Number(r.hours||0).toFixed(2)}</td><td>${money(r.revenue)}</td><td>${money(r.total_cost)}</td><td class="${Number(r.gross_profit||0)<0?'danger':'good'}">${money(r.gross_profit)}</td><td>${esc(r.division)}</td></tr>`).join('')||'<tr><td colspan="11" class="muted">No vessel data imported yet.</td></tr>'
+}
+
+
+function filteredExpenseRows(){
+const q=(document.getElementById('expenseSearch')?.value||'').toLowerCase();
+const category=document.getElementById('expenseCategory')?.value||'';
+const supplier=document.getElementById('expenseSupplier')?.value||'';
+const vessel=document.getElementById('expenseVessel')?.value||'';
+const division=document.getElementById('expenseDivision')?.value||'';
+const year=document.getElementById('expenseYear')?.value||'';
+const month=document.getElementById('expenseMonth')?.value||'';
+const sort=document.getElementById('expenseDateSort')?.value||'desc';
+return sortByDate(expenses.filter(r=>{const dt=date(r.expense_date);return `${r.supplier} ${r.category} ${r.description} ${r.vessel_name} ${r.division}`.toLowerCase().includes(q)&&(!category||r.category===category)&&(!supplier||r.supplier===supplier)&&(!vessel||r.vessel_name===vessel)&&(!division||r.division===division)&&(!year||dt.slice(0,4)===year)&&(!month||dt.slice(5,7)===month)}),'expense_date',sort)
+}
+function setExpenseFilterOptions(){
+setOptions('expenseCategory','All categories',[...new Set(expenses.map(r=>r.category).filter(Boolean))].sort());
+setOptions('expenseSupplier','All suppliers',[...new Set(expenses.map(r=>r.supplier).filter(Boolean))].sort());
+setOptions('expenseVessel','All vessels',[...new Set(expenses.map(r=>r.vessel_name).filter(Boolean))].sort());
+setOptions('expenseDivision','All divisions',[...new Set(expenses.map(r=>r.division).filter(Boolean))].sort());
+setOptions('expenseYear','All years',[...new Set(expenses.map(r=>date(r.expense_date).slice(0,4)).filter(Boolean))].sort().reverse());
+const el=document.getElementById('expenseMonth');if(el)el.innerHTML='<option value="">All months</option>'+monthNames.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('')
+}
+function renderExpenses(){
+if(!document.getElementById('expenseKpis'))return;
+const rows=filteredExpenseRows();
+const total=rows.reduce((s,r)=>s+Number(r.amount||0),0);
+const categories=[...new Set(rows.map(r=>r.category).filter(Boolean))].length;
+const suppliers=[...new Set(rows.map(r=>r.supplier).filter(Boolean))].length;
+const vesselsUsed=[...new Set(rows.map(r=>r.vessel_name).filter(Boolean))].length;
+const highest=Object.values(rows.reduce((m,r)=>{const k=r.category||'Unassigned';m[k]=(m[k]||0)+Number(r.amount||0);return m},{})).sort((a,b)=>b-a)[0]||0;
+document.getElementById('expenseKpis').innerHTML=[['Expense Records',num(rows.length)],['Total Expenses Excl VAT',money(rows.reduce((s,r)=>s+Number(r.amount_excl_vat||r.amount||0),0)),'warn'],['Total Expenses Incl VAT',money(rows.reduce((s,r)=>s+Number(r.amount_incl_vat||0),0)),'warn'],['Categories',num(categories)],['Suppliers',num(suppliers)],['Vessels With Expenses',num(vesselsUsed)],['Highest Category Total',money(highest),'warn']].map(c=>`<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2]||''}">${c[1]}</div></div>`).join('');
+bars('expenseCategoryBars',group(rows,'category','amount'),'expense');
+bars('expenseVesselBars',group(rows,'vessel_name','amount'),'expense');
+const byMonth=Object.values(rows.reduce((m,r)=>{const k=date(r.expense_date).slice(0,7)||r.month||'Unknown';if(!m[k])m[k]={name:k,total:0};m[k].total+=Number(r.amount||0);return m},{})).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+bars('expenseMonthBars',byMonth,'expense');
+document.getElementById('expensesPager').innerHTML=makePager('expenses','renderExpenses');
+document.getElementById('expenseRows').innerHTML=pageSlice('expenses',rows).map(r=>`<tr><td>${date(r.expense_date)}</td><td>${esc(r.supplier)}</td><td>${esc(r.category)}</td><td>${esc(r.description)}</td><td>${esc(r.vessel_name)}</td><td>${esc(r.division)}</td><td class="warn">${money(r.amount_excl_vat||r.amount)}</td><td class="warn">${money(r.amount_incl_vat)}</td><td class="warn">${money(r.amount)}</td></tr>`).join('')||'<tr><td colspan="9" class="muted">No expenses imported yet.</td></tr>'
+}
+
+function registerLookup(){const map={};registers.forEach(r=>{if(r.job_number)map[String(r.job_number).trim()]=r});return map}
+function enrichedJobs(){const map=registerLookup();return jobs.map(j=>{const r=map[String(j.job_number||'').trim()]||{};return {...j,client_name:r.client_name||j.client_name||'Unassigned'}})}
+function setOptions(id,first,values){const el=document.getElementById(id);if(el)el.innerHTML=`<option value="">${first}</option>`+values.map(v=>`<option>${esc(v)}</option>`).join('')}
+function renderReportFilters(){const rows=enrichedJobs();setOptions('reportYear','All years',[...new Set(rows.map(j=>date(j.job_date).slice(0,4)).filter(Boolean))].sort().reverse());document.getElementById('reportMonth').innerHTML='<option value="">All months</option>'+monthNames.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('');setOptions('reportDivision','All divisions',[...new Set(rows.map(j=>j.division).filter(Boolean))].sort());setOptions('reportOps','All OPS managers',[...new Set(rows.map(j=>j.ops_manager).filter(Boolean))].sort());setOptions('reportClient','All clients',[...new Set(rows.map(j=>j.client_name).filter(Boolean))].sort())}
+function filteredReports(){const y=document.getElementById('reportYear')?.value||'',m=document.getElementById('reportMonth')?.value||'',d=document.getElementById('reportDivision')?.value||'',o=document.getElementById('reportOps')?.value||'',c=document.getElementById('reportClient')?.value||'';return enrichedJobs().filter(j=>{const dt=date(j.job_date);return(!y||dt.slice(0,4)===y)&&(!m||dt.slice(5,7)===m)&&(!d||j.division===d)&&(!o||j.ops_manager===o)&&(!c||j.client_name===c)})}
+function summaryRows(rows,key){const m={};rows.forEach(j=>{const k=key(j)||'Unassigned';if(!m[k])m[k]={name:k,jobs:0,hours:0,revenue:0,cost:0,profit:0};m[k].jobs++;m[k].hours+=Number(j.hours||0);m[k].revenue+=Number(j.revenue||0);m[k].cost+=Number(j.total_cost||0);m[k].profit+=Number(j.gross_profit||0)});return Object.values(m).sort((a,b)=>b.profit-a.profit)}
+function monthKey(j){const dt=date(j.job_date);if(!dt)return'Unknown';const y=document.getElementById('reportYear')?.value||'';return y?dt.slice(0,7):dt.slice(5,7)}
+function monthLabel(key){return /^\d{2}$/.test(key)?monthNames[Number(key)-1]:/^\d{4}-\d{2}$/.test(key)?monthNames[Number(key.slice(5,7))-1]:key}
+function monthSummaryRows(rows){const m={};rows.forEach(j=>{const k=monthKey(j);if(!m[k])m[k]={name:k,label:monthLabel(k),jobs:0,hours:0,revenue:0,cost:0,profit:0};m[k].jobs++;m[k].hours+=Number(j.hours||0);m[k].revenue+=Number(j.revenue||0);m[k].cost+=Number(j.total_cost||0);m[k].profit+=Number(j.gross_profit||0)});return Object.values(m).sort((a,b)=>String(a.name).localeCompare(String(b.name)))}
+function renderReports(){if(!document.getElementById('reportKpis'))return;const rows=filteredReports();const revenue=rows.reduce((s,j)=>s+Number(j.revenue||0),0),cost=rows.reduce((s,j)=>s+Number(j.total_cost||0),0),profit=rows.reduce((s,j)=>s+Number(j.gross_profit||0),0),hours=rows.reduce((s,j)=>s+Number(j.hours||0),0);const months=monthSummaryRows(rows);document.getElementById('reportKpis').innerHTML=[['Revenue',money(revenue)],['Total Cost',money(cost),'warn'],['Gross Profit',money(profit),profit<0?'danger':'good'],['GP %',pct(revenue?profit/revenue:0)],['Hours',hours.toFixed(1)],['Jobs',num(rows.length)],['Avg Revenue / Job',money(rows.length?revenue/rows.length:0)],['Avg Profit / Job',money(rows.length?profit/rows.length:0)]].map(c=>`<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2]||''}">${c[1]}</div></div>`).join('');bars('reportHoursMonth',months.map(r=>({name:r.label,total:r.hours})),'count');bars('reportRevenueMonth',months.map(r=>({name:r.label,total:r.revenue})));bars('reportProfitDivision',group(rows,'division','gross_profit'));bars('reportCostDivision',group(rows,'division','total_cost'),'expense');document.getElementById('reportOpsRows').innerHTML=summaryRows(rows,j=>j.ops_manager).map(r=>`<tr><td>${esc(r.name)}</td><td>${num(r.jobs)}</td><td>${r.hours.toFixed(1)}</td><td>${money(r.revenue)}</td><td>${money(r.cost)}</td><td class="${r.profit<0?'danger':'good'}">${money(r.profit)}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">No data.</td></tr>';document.getElementById('reportMonthRows').innerHTML=months.map(r=>`<tr><td>${esc(r.label)}</td><td>${num(r.jobs)}</td><td>${r.hours.toFixed(1)}</td><td>${money(r.revenue)}</td><td>${money(r.cost)}</td><td class="${r.profit<0?'danger':'good'}">${money(r.profit)}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">No data.</td></tr>'}
+function downloadReportCsv(){const csv=[['Job','Date','Invoice','Client','Division','OPS','Hours','Revenue','Total Cost','Gross Profit'],...filteredReports().map(j=>[j.job_number,date(j.job_date),j.invoice_number,j.client_name,j.division,j.ops_manager,j.hours,j.revenue,j.total_cost,j.gross_profit])].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='b4-analysis-report.csv';a.click();URL.revokeObjectURL(url)}
+function uniqueOptions(values){return [...new Set(values.map(v=>String(v||'').trim()).filter(Boolean))].sort()}
+function fillDatalist(id, values){const el=document.getElementById(id);if(el)el.innerHTML=uniqueOptions(values).map(v=>`<option value="${esc(v)}"></option>`).join('')}
+function fillSelect(id, values, firstLabel){const el=document.getElementById(id);if(!el)return;const current=el.value;const opts=uniqueOptions(values);el.innerHTML=`<option value="">${firstLabel}</option>`+opts.map(v=>`<option>${esc(v)}</option>`).join('');if(opts.includes(current))el.value=current}
+function fillCrewPicker(id, values){const el=document.getElementById(id);if(!el)return;const selected=[...el.querySelectorAll('input:checked')].map(i=>i.value);const opts=uniqueOptions(values);el.innerHTML=opts.map((v,i)=>`<label><input class="crewChk" type="checkbox" value="${esc(v)}" ${selected.includes(v)?'checked':''}> ${esc(v)}</label>`).join('')}
+function selectedCrewNames(){return [...document.querySelectorAll('#manualStaffPicker .crewChk:checked')].map(i=>i.value).join(', ')}
+function clearCrewPicker(){document.querySelectorAll('#manualStaffPicker .crewChk').forEach(i=>i.checked=false)}
+function fillMultiSelect(id, values){fillCrewPicker('manualStaffPicker',values)}
+function setManualJobCardOptions(){
+ const validOps=['Jolanda','Eugen','Carmon','Bresler','Elliotte'];
+ fillSelect('manualClient',[...jobs.map(j=>j.client_name),...registers.map(r=>r.client_name),...cards.map(c=>c.client_name)],'Select client');
+ fillSelect('manualLocation',[...cards.map(c=>c.location),'Walvis Bay','Lüderitz','Offshore','Anchorage','Namdock','Port','Client site'],'Select location');
+ fillDatalist('manualContactOptions',[...cards.map(c=>c.contact_person),...registers.map(r=>r.client_feedback)]);
+ const staffList=[...cards.flatMap(c=>String(c.staff_names||'').split(/[,;]+/)),...STAFF_CREW_LIST];
+ fillDatalist('manualStaffOptions',staffList);
+ fillMultiSelect('manualStaff',staffList);
+ renderEquipmentPicker();
+ fillSelect('manualOps', validOps, 'OPS Manager');
+}
+function autofillManualJobCard(){const n=String(document.getElementById('manualJobNumber').value||'').trim();const msg=document.getElementById('manualCardMessage');if(!n)return;const j=jobs.find(x=>String(x.job_number||'').trim()===n)||registers.find(x=>String(x.job_number||'').trim()===n);if(!j){if(msg){msg.textContent='Job number not found yet. You can still save this card as Pending Office Review.';msg.className='status error'}return}const set=(id,val)=>{const el=document.getElementById(id);if(el&&!el.value&&val)el.value=val};set('manualClient',j.client_name);set('manualOps',j.ops_manager);set('manualDivision',j.division);if(msg){msg.textContent='Job found. Client, OPS Manager and Division linked in the background.';msg.className='status ok'}}
+function calculateManualHours(){const st=document.getElementById('manualStart')?.value,en=document.getElementById('manualEnd')?.value;if(!st||!en)return;const [sh,sm]=st.split(':').map(Number),[eh,em]=en.split(':').map(Number);let mins=(eh*60+em)-(sh*60+sm);if(mins<0)mins+=24*60;document.getElementById('manualHours').value=(mins/60).toFixed(2)}
+function getManualJobCardPayload(){const canCost=canSeeAdmin();return {job_number:document.getElementById('manualJobNumber').value,client_name:document.getElementById('manualClient').value,contact_person:document.getElementById('manualContact').value,location:document.getElementById('manualLocation').value,job_date:document.getElementById('manualDate').value,vessel_name:document.getElementById('manualVessel').value,ops_manager:document.getElementById('manualOps').value,division:document.getElementById('manualDivision').value,activity_type:document.getElementById('manualActivity').value,start_time:document.getElementById('manualStart').value,end_time:document.getElementById('manualEnd').value,hours:document.getElementById('manualHours').value,staff_names:selectedCrewNames(),equipment_used:getSelectedEquipment(),labour_cost:canCost?document.getElementById('manualLabour').value:0,equipment_cost:canCost?document.getElementById('manualEquipment').value:0,workshop_cost:canCost?document.getElementById('manualWorkshop').value:0,material_cost:canCost?document.getElementById('manualMaterial').value:0,other_cost:canCost?document.getElementById('manualOther').value:0,description:document.getElementById('manualDescription').value,created_offline_at:new Date().toISOString()}}
+function clearManualJobCardForm(){['manualJobNumber','manualClient','manualContact','manualLocation','manualDate','manualVessel','manualOps','manualDivision','manualActivity','manualStart','manualEnd','manualHours','manualLabour','manualEquipment','manualWorkshop','manualMaterial','manualOther','manualDescription'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearCrewPicker();clearEquipmentPicker()}
+function offlineQueue(){try{return JSON.parse(localStorage.getItem('b4OfflineJobCards')||'[]')}catch(e){return []}}
+function setOfflineQueue(q){localStorage.setItem('b4OfflineJobCards',JSON.stringify(q));updateOfflineCardStatus()}
+function updateOfflineCardStatus(){const el=document.getElementById('offlineCardStatus');if(el)el.textContent='Offline queue: '+offlineQueue().length+' job card'+(offlineQueue().length===1?'':'s')}
+function queueOfflineJobCard(payload){const q=offlineQueue();q.push({...payload,offline_id:'offline-'+Date.now()+'-'+Math.random().toString(16).slice(2)});setOfflineQueue(q)}
+async function saveManualJobCard(){
+ const msg=document.getElementById('manualCardMessage');
+ const payload=getManualJobCardPayload();
+ if(!String(payload.job_number||'').trim()){msg.textContent='Job Number is required.';msg.className='status error';return}
+ msg.textContent=navigator.onLine?'Saving job card...':'No internet. Saving offline on this device...';
+ msg.className='status';
+ if(!navigator.onLine){
+  queueOfflineJobCard(payload);
+  msg.textContent='Saved offline on this device. It will sync automatically when back online.';
+  msg.className='status ok';
+  clearManualJobCardForm();
+  return;
+ }
+ try{
+  await api('/api/job-cards/manual',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  msg.textContent='Job card submitted for Pending Review. OPS/Admin must approve costs before profit is affected.';
+  msg.className='status ok';
+  clearManualJobCardForm();
+  await loadAll();
+  showView('cards');
+ }catch(e){
+  if(shouldQueueOfflineError(e)){
+   queueOfflineJobCard(payload);
+   msg.textContent='Server/network unavailable. Card saved offline and will sync later.';
+   msg.className='status ok';
+   clearManualJobCardForm();
+  }else{
+   msg.textContent='Could not save job card: '+(e.message||'unknown error');
+   msg.className='status error';
+  }
+ }
+}
+async function syncOfflineJobCards(){
+ const msg=document.getElementById('manualCardMessage');
+ let q=offlineQueue();
+ if(!q.length){if(msg){msg.textContent='No offline job cards to sync.';msg.className='status ok'}return}
+ if(!navigator.onLine){if(msg){msg.textContent='Still offline. '+q.length+' job card(s) remain saved on this device.';msg.className='status error'}return}
+ let synced=0,failed=[],blocked=[];
+ for(const card of q){
+  try{
+   await api('/api/job-cards/manual',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(card)});
+   synced++;
+  }catch(e){
+   if(shouldQueueOfflineError(e))failed.push(card);
+   else blocked.push({...card,last_sync_error:e.message||'Validation/auth error'});
+  }
+ }
+ setOfflineQueue([...failed,...blocked]);
+ if(msg){
+  if(blocked.length){
+   msg.textContent='Synced '+synced+' card(s). '+blocked.length+' card(s) need correction/login before sync. '+failed.length+' remain offline.';
+   msg.className='status error';
+  }else{
+   msg.textContent='Synced '+synced+' card(s). '+failed.length+' remain offline.';
+   msg.className=failed.length?'status error':'status ok';
+  }
+ }
+ if(synced){await loadAll();renderCards();renderDashboard();renderJobProfit()}
+}
+window.addEventListener('online',()=>{checkStatus();syncOfflineJobCards()});window.addEventListener('offline',()=>checkStatus());window.addEventListener('load',updateOfflineCardStatus);
+async function uploadExcel(){const input=document.getElementById('excelFile'),msg=document.getElementById('importMessage');if(!input.files.length){msg.textContent='Please choose a file first.';msg.className='status error';return}const form=new FormData();form.append('file',input.files[0]);msg.textContent='Uploading and importing...';msg.className='status';try{const r=await api('/api/imports/excel',{method:'POST',body:form});msg.textContent=`Imported. Data ${r.importedRows}, Register ${r.registerRows||0}, Job Cards ${r.cardRows||0}, Salaries ${r.salaryRows||0}.`;msg.className='status ok';await loadAll();showView('dashboard')}catch(e){msg.textContent=e.message;msg.className='status error'}}async function seedTestData(){await api('/api/imports/test-seed',{method:'POST'});await loadAll()}
+
+
+function renderEquipmentPicker(){
+  const box=document.getElementById('equipmentPicker');
+  if(!box)return;
+  const selected=[...box.querySelectorAll('.equipment-check:checked')].map(x=>x.value);
+  const importedEquipment=(cards||[]).flatMap(c=>String(c.equipment_used||'').split(/[,;]+/));
+  const opts=uniqueOptions([...EQUIPMENT_LIST,...importedEquipment]);
+  box.innerHTML=opts.map(v=>`<label><input type="checkbox" class="equipment-check" value="${esc(v)}" ${selected.includes(v)?'checked':''}> ${esc(v)}</label>`).join('');
+}
+function getSelectedEquipment(){
+  return [...document.querySelectorAll('#equipmentPicker .equipment-check:checked')].map(x=>x.value).join(', ');
+}
+function clearEquipmentPicker(){document.querySelectorAll('#equipmentPicker .equipment-check').forEach(i=>i.checked=false)}
+
+function pendingCostInputs(id){
+  return `<div style="display:grid;grid-template-columns:repeat(2,minmax(80px,1fr));gap:6px;min-width:240px">
+    <input id="labour_${id}" placeholder="Labour" inputmode="decimal">
+    <input id="equip_${id}" placeholder="Equipment" inputmode="decimal">
+    <input id="workshop_${id}" placeholder="Workshop" inputmode="decimal">
+    <input id="material_${id}" placeholder="Materials" inputmode="decimal">
+    <input id="other_${id}" placeholder="Other" inputmode="decimal">
+    <button class="btn green" type="button" onclick="acceptJobCard(${id})">Accept</button>
+    <button class="btn orange" type="button" onclick="rejectJobCard(${id})">Reject</button>
+  </div>`;
+}
+function renderPendingReviews(){
+  const body=document.getElementById('pendingReviewRows');
+  const panel=document.getElementById('pendingReviewPanel');
+  if(!body||!panel)return;
+  if(!canSeeAdmin()){panel.style.display='none';return}
+  panel.style.display='';
+  const rows=(pendingCards||[]).filter(c=>String(c.review_status||'pending')==='pending'||String(c.job_link_status||'')==='pending_review');
+  body.innerHTML=rows.map(c=>`<tr>
+    <td><span class="warn">Pending</span></td>
+    <td>${esc(c.job_number)}</td>
+    <td>${date(c.job_date)}</td>
+    <td>${esc(c.client_name)}</td>
+    <td>${esc(c.vessel_name)}</td>
+    <td>${esc(c.ops_manager)}</td>
+    <td>${esc(c.completed_by_name||c.completed_by_user)}</td>
+    <td>${Number(c.hours||0).toFixed(2)}</td>
+    <td>${esc(c.staff_names)}</td>
+    <td>${esc(c.description)}</td>
+    <td>${pendingCostInputs(c.id)}</td>
+  </tr>`).join('')||'<tr><td colspan="11" class="muted">No pending job cards for review.</td></tr>';
+}
+async function acceptJobCard(id){
+  try{
+    await api('/api/job-cards/'+id+'/costs',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      labour_cost:document.getElementById('labour_'+id)?.value||0,
+      equipment_cost:document.getElementById('equip_'+id)?.value||0,
+      workshop_cost:document.getElementById('workshop_'+id)?.value||0,
+      material_cost:document.getElementById('material_'+id)?.value||0,
+      other_cost:document.getElementById('other_'+id)?.value||0
+    })});
+    await loadAll();
+  }catch(e){alert(e.message)}
+}
+async function rejectJobCard(id){
+  try{
+    if(!confirm('Reject this job card?'))return;
+    await api('/api/job-cards/'+id+'/reject',{method:'PATCH'});
+    await loadAll();
+  }catch(e){alert(e.message)}
+}
+
+async function loadAll(){renderEquipmentPicker();await checkStatus();const staffOnly=currentAccessRole()==='staff';dashboardData=staffOnly?{totals:{},divisions:[],opsManagers:[]}:await api('/api/dashboard');jobs=await api('/api/jobs?limit=5000').catch(()=>[]);registers=await api('/api/job-register?limit=5000').catch(()=>[]);cards=await api('/api/job-cards?limit=5000').catch(()=>[]);pendingCards=staffOnly?[]:await api('/api/job-cards/pending').catch(()=>[]);jobProfit=await api('/api/job-profit?limit=5000').catch(()=>[]);vessels=await api('/api/vessels?limit=10000').catch(()=>[]);expenses=await api('/api/expenses?limit=10000').catch(()=>[]);vesselDashboard=await api('/api/vessel-dashboard').catch(()=>null);salaries=await api('/api/salaries').catch(()=>[]);imports=await api('/api/imports').catch(()=>[]);document.getElementById('jobDivision').innerHTML='<option value="">All divisions</option>'+[...new Set(jobs.map(j=>j.division).filter(Boolean))].sort().map(v=>`<option>${esc(v)}</option>`).join('');document.getElementById('jobOps').innerHTML='<option value="">All OPS managers</option>'+[...new Set(jobs.map(j=>j.ops_manager).filter(Boolean))].sort().map(v=>`<option>${esc(v)}</option>`).join('');setManualJobCardOptions();applyAccessControl();setDashboardFilterOptions();setJobCardFilterOptions();renderDashboard();renderJobs();renderClients();renderRegister();renderCards();renderPendingReviews();setVesselFilterOptions();renderVessels();setExpenseFilterOptions();renderExpenses();renderSalaries();renderImports();renderReportFilters();renderReports();setInvoiceFilterOptions();renderInvoice();setDebtorsFilterOptions();renderDebtors();setQualityFilterOptions();renderQuality();renderOps();setAnalyticsFilterOptions();renderAnalytics();const initial=(location.hash||'').replace('#','');if(currentAccessRole()==='staff')showView('cards');else if(initial&&document.getElementById(initial+'View'))showView(initial)}
+initAuth().catch(e=>{showLogin(e.message)});
+</script>
+<script>
+let deferredPrompt = null;
+
+function isStandaloneMode() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function isIOSDevice() {
+  return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+}
+
+function showInstallBanner(force = false) {
+  const banner = document.getElementById('installBanner');
+  if (!banner || isStandaloneMode()) return;
+  if (!force && localStorage.getItem('b4InstallDismissed') === 'yes') return;
+  banner.style.display = 'block';
+}
+
+window.addEventListener('beforeinstallprompt', function(event) {
+  event.preventDefault();
+  deferredPrompt = event;
+  showInstallBanner(true);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  const installBtn = document.getElementById('installAppBtn');
+  const dismissBtn = document.getElementById('dismissInstallBtn');
+  const banner = document.getElementById('installBanner');
+
+  setTimeout(function() {
+    showInstallBanner(false);
+  }, 1200);
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        if (banner) banner.style.display = 'none';
+        localStorage.setItem('b4InstallDismissed', 'yes');
+        return;
+      }
+
+      if (isIOSDevice()) {
+        alert('On iPhone: tap Share, then Add to Home Screen.');
+      } else {
+        alert('Use Chrome menu ⋮ and choose Install app or Add to Home screen.');
+      }
+    });
+  }
+
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', function() {
+      localStorage.setItem('b4InstallDismissed', 'yes');
+      if (banner) banner.style.display = 'none';
+    });
+  }
+});
+
+window.addEventListener('appinstalled', function() {
+  localStorage.setItem('b4InstallDismissed', 'yes');
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.style.display = 'none';
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/service-worker.js');
+  });
+}
+</script>
+
+</body>
+</html>
